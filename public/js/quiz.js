@@ -172,6 +172,7 @@ function sendAvailability() {
   const s = ctxRef.status;
   if (s.offline) return { ok: false, text: 'Sem conexão com o servidor. Peça ajuda a um apresentador.' };
   if (!s.envioDisponivel) return { ok: false, text: 'O envio por WhatsApp está indisponível agora. Peça ajuda a um apresentador — você ainda pode ver como funciona na seção Demonstração.' };
+  if (s.estatico) return { ok: true, sim: true, text: 'Versão online: o fluxo é simulado no seu navegador. Nenhuma mensagem é enviada e o número não sai do seu aparelho.' };
   if (s.modo === 'simulado') return { ok: true, sim: true, text: 'Modo demonstração: nenhuma mensagem real será enviada — o fluxo é simulado.' };
   return { ok: true, text: '' };
 }

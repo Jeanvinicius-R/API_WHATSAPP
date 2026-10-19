@@ -1,5 +1,5 @@
 // Orquestrador: cenas, navegação, atalhos, tela cheia, modo apresentação, reinício e status do servidor.
-import { $, $$, h, hydrateIcons, icon, api, sleep, reducedMotion, countUp } from './util.js';
+import { $, $$, h, hydrateIcons, icon, api, sleep, reducedMotion, countUp, hooks } from './util.js';
 import * as hero from './hero.js';
 import * as profissao from './profissao.js';
 import * as rotina from './rotina.js';
@@ -106,6 +106,9 @@ async function pollStatus() {
     if (prev !== null && prev !== data.epoch) resetExperience(); // admin pediu reinício
   }
   $('#modoChip').hidden = ctx.status.modo !== 'simulado';
+  $('#modoChip').textContent = ctx.status.estatico
+    ? 'VERSÃO ONLINE · BACK-END SIMULADO · NENHUMA MENSAGEM É ENVIADA'
+    : 'MODO DEMONSTRAÇÃO · ENVIOS SIMULADOS';
   ctx.listeners.forEach((fn) => fn(ctx.status));
 }
 
@@ -137,6 +140,11 @@ $('#btnNext').addEventListener('click', () => step(1));
 $('#btnPresent').addEventListener('click', () => togglePresentation());
 $('#btnReset').addEventListener('click', () => resetExperience());
 $$('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
+
+// Versão publicada no GitHub Pages: não há servidor, então o back-end é simulado no navegador.
+if (document.querySelector('meta[name="be-mode"]')?.content === 'static') {
+  hooks.staticHandler = (await import('./static-api.js')).staticApi;
+}
 
 await pollStatus();
 for (const [id, m] of Object.entries(MODULES)) m.init?.(ctx, $(`#${id}`));

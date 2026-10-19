@@ -127,6 +127,17 @@ A seção **Demonstração** do menu roda o mesmo fluxo sempre simulado, sem ped
 
 ---
 
+## Versão online (GitHub Pages)
+
+**https://jeanvinicius-r.github.io/API_WHATSAPP/** — qualquer pessoa pode visitar, sem instalar nada.
+
+O GitHub Pages só serve arquivos estáticos: **não existe servidor Node nem WhatsApp lá.** Por isso a versão online usa o mesmo front-end com um **back-end simulado dentro do navegador** ([`public/js/static-api.js`](public/js/static-api.js)): o quiz, as etapas do envio e a demonstração funcionam, mas **nenhuma mensagem é enviada** e nenhum dado sai do aparelho do visitante. A tela avisa isso (faixa "VERSÃO ONLINE · BACK-END SIMULADO"). O envio real de WhatsApp só existe na versão local (`npm start`), usada na feira.
+
+- O site é gerado por `node scripts/build-pages.js` (pasta `_site/`, ignorada pelo Git) a partir das mesmas fontes do servidor (`src/data`, `src/validation.js`), e publicado pelo workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) a cada push na `main`.
+- **Configuração única:** no GitHub, em **Settings → Pages → Build and deployment → Source**, escolha **GitHub Actions**. Depois disso o deploy é automático.
+- Limitação conhecida: como não há servidor, as respostas corretas do quiz ficam em `data/static-data.json` e podem ser vistas por quem inspecionar a página. É aceitável para uma vitrine; na versão da feira o servidor corrige tudo.
+- A área `/admin` nunca é publicada.
+
 ## Segurança e privacidade (resumo)
 
 - **Consentimento explícito** (caixa marcada) é exigido pelo servidor; envio **apenas** ao número informado, sem disparo em massa.
@@ -170,6 +181,8 @@ src/
 public/                experiência (index.html, css/, js/ — um módulo por seção)
 test/                  testes automatizados
 docs/WHATSAPP.md       riscos e alternativas da integração
+scripts/build-pages.js gera a versão estática para o GitHub Pages
+.github/workflows/     deploy automático no Pages
 ```
 
 ## Testes
@@ -180,7 +193,9 @@ npm test
 
 ### O que foi efetivamente testado (em 19/10/2026)
 
-Executado com **45 testes automatizados, todos passando**, mais verificação manual assistida no Chrome:
+Executado com **48 testes automatizados, todos passando**, mais verificação manual assistida no Chrome:
+
+- Versão estática: o build gera os arquivos certos (sem `/admin`, caminhos relativos) e o back-end simulado cobre quiz, validações e as 6 etapas do envio; no Chrome foi testada servida em subpasta (`/API_WHATSAPP/`), como no Pages. **O deploy no Pages em si só pode ser confirmado depois do push** (e de ativar o Pages nas configurações).
 
 - Validação de celulares (formatos, DDDs, fixos, repetidos, DDD 55), máscaras e apelido.
 - Quiz: banco (≥ 20 perguntas, 4 alternativas, 3 níveis), pontuação e classificação de 0 a 8 acertos, respostas duplicadas/inválidas, expiração de sessão, não vazamento da resposta correta.

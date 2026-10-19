@@ -1,6 +1,9 @@
 # dependências
 node_modules/
 
+# versão estática gerada (GitHub Pages) — o workflow gera de novo a cada deploy
+_site/
+
 # SESSÃO DO WHATSAPP — nunca versionar (dá acesso à conta conectada)
 .wwebjs_auth/
 .wwebjs_cache/

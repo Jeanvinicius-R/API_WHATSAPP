@@ -87,8 +87,12 @@ export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/** Em modo estático (GitHub Pages) o app.js instala aqui o back-end simulado no navegador. */
+export const hooks = { staticHandler: null };
+
 /** Chamada à API. Sempre devolve { status, data } — nunca lança por status HTTP. */
 export async function api(path, { method = 'GET', body } = {}) {
+  if (hooks.staticHandler) return hooks.staticHandler(path, { method, body });
   try {
     const res = await fetch(path, {
       method,
