@@ -1,0 +1,183 @@
+{
+  "atualizadoEm": "2026-10-19",
+  "aviso": "Os valores são referências de mercado e podem variar conforme experiência, empresa, região e modalidade de contratação.",
+  "avisoConversao": "A conversão para reais é apenas uma estimativa de ordem de grandeza: não considera impostos, encargos, benefícios, 13º salário nem diferenças de custo de vida.",
+  "cambio": {
+    "fonte": "Banco Central Europeu, via API Frankfurter",
+    "url": "https://api.frankfurter.dev/v1/latest?base=BRL&symbols=USD,CAD,EUR",
+    "dataReferencia": "2026-10-19",
+    "observacao": "Taxas = quantos reais valem 1 unidade da moeda (inverso da cotação publicada em BRL→moeda).",
+    "reaisPorUnidade": { "BRL": 1, "USD": 5.0452, "CAD": 3.5848, "EUR": 5.6631 }
+  },
+  "horasPorMes": 173.33,
+  "paises": [
+    {
+      "id": "br",
+      "nome": "Brasil",
+      "bandeira": "🇧🇷",
+      "series": [
+        {
+          "id": "br-roberthalf-sp",
+          "titulo": "Robert Half · Guia Salarial 2026 · São Paulo",
+          "fonte": "Robert Half Brasil",
+          "url": "https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-back-end-pleno/sao-paulo",
+          "ano": "2026",
+          "cargo": "Desenvolvedor(a) Back-End — Júnior, Pleno e Sênior",
+          "moeda": "BRL",
+          "periodicidade": "mensal",
+          "tipo": "niveis",
+          "cobertura": "Salários de profissionais colocados por recrutadores da empresa, na cidade de São Paulo.",
+          "rotulos": ["Percentil 25", "Mediana", "Percentil 75"],
+          "niveis": {
+            "junior": [5750, 6500, 8300],
+            "pleno": [9200, 12000, 15450],
+            "senior": [12250, 16000, 20600]
+          },
+          "limitacoes": "A página da Robert Half não rotula explicitamente moeda e periodicidade; os valores são compatíveis com salário mensal em reais (inferência nossa). Reflete vagas intermediadas por recrutamento, que tendem a ficar acima da média do mercado geral."
+        },
+        {
+          "id": "br-roberthalf-cwb",
+          "titulo": "Robert Half · Guia Salarial 2026 · Curitiba",
+          "fonte": "Robert Half Brasil",
+          "url": "https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-back-end-pleno/curitiba",
+          "ano": "2026",
+          "cargo": "Desenvolvedor(a) Back-End — Júnior, Pleno e Sênior",
+          "moeda": "BRL",
+          "periodicidade": "mensal",
+          "tipo": "niveis",
+          "cobertura": "Salários de profissionais colocados por recrutadores da empresa, na cidade de Curitiba.",
+          "rotulos": ["Percentil 25", "Mediana", "Percentil 75"],
+          "niveis": {
+            "junior": [5800, 6500, 8350],
+            "pleno": [9400, 12250, 15750],
+            "senior": [11700, 15300, 19650]
+          },
+          "limitacoes": "A página da Robert Half não rotula explicitamente moeda e periodicidade; os valores são compatíveis com salário mensal em reais (inferência nossa)."
+        },
+        {
+          "id": "br-portalsalario",
+          "titulo": "Portal Salário · Desenvolvedor back-end (CAGED)",
+          "fonte": "Portal Salário (dados do Novo CAGED/Ministério do Trabalho)",
+          "url": "https://www.salario.com.br/profissao/desenvolvedor-back-end",
+          "ano": "09/2025 a 08/2026",
+          "cargo": "Desenvolvedor back-end (CBO 3171-10)",
+          "moeda": "BRL",
+          "periodicidade": "mensal",
+          "tipo": "geral",
+          "comparacao": { "grupo": "oficial", "nota": "Mediana de desenvolvedores back-end com carteira assinada (CAGED, CBO 3171-10)." },
+          "cobertura": "Média de 52.958 admitidos e desligados no regime CLT, em todo o Brasil, nos últimos 12 meses (jornada de referência de 42 h semanais).",
+          "pontos": [
+            { "rotulo": "Piso", "valor": 3439.36 },
+            { "rotulo": "Mediana", "valor": 4576 },
+            { "rotulo": "Média", "valor": 6061.3 },
+            { "rotulo": "Teto", "valor": 12000 }
+          ],
+          "limitacoes": "Não separa júnior, pleno e sênior (essa abertura é paga no site). Cobre apenas vínculo CLT e inclui empresas de todos os portes, por isso fica abaixo das faixas de recrutadoras."
+        }
+      ]
+    },
+    {
+      "id": "us",
+      "nome": "Estados Unidos",
+      "bandeira": "🇺🇸",
+      "series": [
+        {
+          "id": "us-bls",
+          "titulo": "U.S. Bureau of Labor Statistics · Software Developers",
+          "fonte": "U.S. Bureau of Labor Statistics (Occupational Outlook Handbook)",
+          "url": "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm",
+          "ano": "Maio de 2025",
+          "cargo": "Software Developers (SOC 15-1252) — categoria ampla, não exclusiva de back-end",
+          "moeda": "USD",
+          "periodicidade": "anual",
+          "tipo": "geral",
+          "comparacao": { "grupo": "oficial", "nota": "Mediana de todos os desenvolvedores de software dos EUA (não só back-end), anual ÷ 12." },
+          "cobertura": "Estimativas oficiais de salários nacionais (programa OEWS).",
+          "pontos": [
+            { "rotulo": "10% ganham menos que", "valor": 82460 },
+            { "rotulo": "Mediana", "valor": 135980 },
+            { "rotulo": "10% ganham mais que", "valor": 214670 }
+          ],
+          "limitacoes": "Agrupa todos os desenvolvedores de software (front-end, back-end, mobile etc.). Não separa por nível de experiência nem por especialidade."
+        },
+        {
+          "id": "us-so",
+          "titulo": "Stack Overflow Developer Survey 2025 · Back-end",
+          "fonte": "Stack Overflow Developer Survey 2025",
+          "url": "https://survey.stackoverflow.co/2025/work",
+          "ano": "2025",
+          "cargo": "Developer, back-end (autodeclarado)",
+          "moeda": "USD",
+          "periodicidade": "anual",
+          "tipo": "geral",
+          "comparacao": { "grupo": "pesquisa", "nota": "Remuneração total anual ÷ 12; inclui bônus e benefícios, e a amostra inclui big techs." },
+          "cobertura": "Mediana de respondentes dos EUA que se declararam desenvolvedores back-end.",
+          "pontos": [{ "rotulo": "Mediana", "valor": 175000 }],
+          "limitacoes": "Pesquisa voluntária e autodeclarada; considera remuneração total antes de impostos (salário, bônus e benefícios), o que inclui big techs. O tamanho da amostra por país/função não é informado."
+        }
+      ]
+    },
+    {
+      "id": "ca",
+      "nome": "Canadá",
+      "bandeira": "🇨🇦",
+      "series": [
+        {
+          "id": "ca-jobbank",
+          "titulo": "Job Bank (Governo do Canadá) · Software Developer",
+          "fonte": "Job Bank Canada, com base na Labour Force Survey (Statistics Canada)",
+          "url": "https://www.jobbank.gc.ca/marketreport/wages-occupation/22548/ca",
+          "ano": "2023–2024 (atualizado em 19/11/2025)",
+          "cargo": "Software developers and programmers (NOC 21232) — categoria ampla, não exclusiva de back-end",
+          "moeda": "CAD",
+          "periodicidade": "hora",
+          "tipo": "geral",
+          "comparacao": { "grupo": "oficial", "nota": "Mediana de todos os desenvolvedores de software do Canadá (não só back-end), CAD/hora × 173,33 h/mês." },
+          "cobertura": "Salário-hora nacional: valor baixo, mediano e alto.",
+          "pontos": [
+            { "rotulo": "Baixo", "valor": 30.0 },
+            { "rotulo": "Mediana", "valor": 48.08 },
+            { "rotulo": "Alto", "valor": 76.92 }
+          ],
+          "limitacoes": "Valor por hora (convertido para mensal apenas na comparação, com 173,33 h/mês). Abrange todos os desenvolvedores de software e não separa por nível."
+        }
+      ]
+    },
+    {
+      "id": "de",
+      "nome": "Alemanha",
+      "bandeira": "🇩🇪",
+      "series": [
+        {
+          "id": "de-so",
+          "titulo": "Stack Overflow Developer Survey 2025 · Back-end",
+          "fonte": "Stack Overflow Developer Survey 2025",
+          "url": "https://survey.stackoverflow.co/2025/work",
+          "ano": "2025",
+          "cargo": "Developer, back-end (autodeclarado)",
+          "moeda": "USD",
+          "periodicidade": "anual",
+          "tipo": "geral",
+          "comparacao": { "grupo": "pesquisa", "nota": "Remuneração total anual ÷ 12, antes de impostos." },
+          "cobertura": "Mediana de respondentes da Alemanha que se declararam desenvolvedores back-end.",
+          "pontos": [{ "rotulo": "Mediana", "valor": 87011 }],
+          "limitacoes": "Pesquisa voluntária e autodeclarada, em dólares (a conversão da moeda local é feita pela pesquisa e o método não é detalhado). Remuneração total antes de impostos."
+        }
+      ]
+    },
+    {
+      "id": "pt",
+      "nome": "Portugal",
+      "bandeira": "🇵🇹",
+      "series": [],
+      "indisponivel": "Não encontramos dado salarial específico de back-end em Portugal em fonte oficial ou com metodologia transparente. Preferimos não exibir um número a inventá-lo.",
+      "consultadasNaoUsadas": [
+        {
+          "titulo": "Talentup · Backend Developer em Portugal",
+          "url": "https://talentup.io/salary/Backend%20Developer/Portugal",
+          "motivo": "Indica mediana de € 27.200 brutos anuais, mas não informa metodologia, tamanho de amostra nem data, e a abertura por nível exige login."
+        }
+      ]
+    }
+  ]
+}

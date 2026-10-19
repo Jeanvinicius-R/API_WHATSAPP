@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Administração · Back-end Experience</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <main>
+    <h1>⚙️ Administração <small>Back-end Experience</small></h1>
+
+    <section id="login" hidden>
+      <p>Informe o token definido em <code>ADMIN_TOKEN</code> (arquivo <code>.env</code>) ou exibido no terminal ao iniciar.</p>
+      <form id="loginForm">
+        <input id="token" type="password" autocomplete="off" placeholder="Token de administrador" required>
+        <button type="submit">Entrar</button>
+      </form>
+      <p id="loginErro" class="erro" role="alert"></p>
+    </section>
+
+    <section id="painel" hidden>
+      <div class="grade">
+        <div class="card"><h2>WhatsApp</h2><p id="waEstado" class="grande">—</p><p id="waDetalhe" class="mudo"></p>
+          <button id="btnReiniciarWa">Reiniciar WhatsApp</button></div>
+        <div class="card"><h2>Envio real possível?</h2><p id="envioPossivel" class="grande">—</p><p class="mudo" id="modoTexto"></p></div>
+        <div class="card"><h2>Mensagens (nesta execução)</h2>
+          <ul class="contadores"><li>Enviadas: <b id="cEnviados">0</b></li><li>Simuladas: <b id="cSimulados">0</b></li><li>Falhas: <b id="cFalhas">0</b></li><li>Bloqueadas: <b id="cBloqueados">0</b></li></ul></div>
+      </div>
+
+      <div class="card" id="qrCard" hidden>
+        <h2>QR Code de autenticação</h2>
+        <p class="mudo">No celular: WhatsApp → Aparelhos conectados → Conectar um aparelho. Não mostre esta tela aos visitantes.</p>
+        <img id="qrImg" alt="QR Code para conectar o WhatsApp" width="320" height="320">
+      </div>
+
+      <div class="card">
+        <h2>Controles da feira</h2>
+        <label class="chave"><input type="checkbox" id="demoToggle"> <span>Modo demonstração (simula envios, <b>nenhuma mensagem real</b>)</span></label>
+        <button id="btnReset">Reiniciar a experiência visual (todas as telas voltam ao início)</button>
+        <p class="mudo" id="limites"></p>
+      </div>
+
+      <div class="card">
+        <h2>Erros operacionais recentes</h2>
+        <ul id="erros" class="erros"><li class="mudo">Nenhum erro.</li></ul>
+      </div>
+
+      <button id="btnSair" class="sec">Sair</button>
+    </section>
+  </main>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

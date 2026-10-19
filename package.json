@@ -1,0 +1,25 @@
+{
+  "name": "backend-experience",
+  "version": "1.0.0",
+  "description": "BACK-END EXPERIENCE — experiência interativa para a Feira de Profissões 2026, com envio real de resultado do quiz via WhatsApp.",
+  "main": "src/server.js",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "start:demo": "node src/server.js --demo",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "qrcode": "^1.5.4",
+    "whatsapp-web.js": "^1.26.0"
+  }
+}

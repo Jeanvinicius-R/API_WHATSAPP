@@ -1,0 +1,21 @@
+# dependências
+node_modules/
+
+# SESSÃO DO WHATSAPP — nunca versionar (dá acesso à conta conectada)
+.wwebjs_auth/
+.wwebjs_cache/
+session/
+*.session
+
+# credenciais e configuração local
+.env
+.env.*
+!.env.example
+
+# logs e temporários
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
