@@ -5,7 +5,6 @@ const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-const { createQuizService } = require('./services/quiz');
 const { createSender } = require('./services/sender');
 const { createPublicRouter } = require('./routes/public');
 const { createAdminRouter } = require('./routes/admin');
@@ -13,8 +12,8 @@ const { createAdminRouter } = require('./routes/admin');
 /**
  * Monta o app Express. Todas as dependências são injetadas para permitir testes sem WhatsApp real.
  */
-function createApp({ config, whatsapp, logger, quiz = createQuizService({ config }) }) {
-  const sender = createSender({ config, whatsapp, quiz, logger });
+function createApp({ config, whatsapp, logger }) {
+  const sender = createSender({ config, whatsapp, logger });
   const app = express();
   app.disable('x-powered-by');
 
@@ -56,7 +55,7 @@ function createApp({ config, whatsapp, logger, quiz = createQuizService({ config
     message: { erro: { codigo: 'MUITAS_REQUISICOES', mensagem: 'Muitos envios em pouco tempo. Aguarde um minuto.' } },
   });
 
-  app.use('/api', createPublicRouter({ config, whatsapp, quiz, sender, sendLimiter }));
+  app.use('/api', createPublicRouter({ sender, sendLimiter }));
   app.use('/admin', createAdminRouter({ config, whatsapp, sender, logger }));
 
   app.use(express.static(path.join(__dirname, '..', 'public'), { index: 'index.html', maxAge: 0 }));

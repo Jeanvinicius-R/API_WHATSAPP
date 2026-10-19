@@ -4,9 +4,9 @@ const crypto = require('node:crypto');
 const {
   normalizeBrazilianMobile, sanitizeNickname, maskForLog, maskForDisplay,
 } = require('../validation');
-const {
-  MENSAGENS_ALEATORIAS, MENSAGENS_POR_CLASSIFICACAO,
-} = require('../data/mensagens');
+const { MENSAGENS_ALEATORIAS } = require('../data/mensagens');
+
+const ROTA = '/api/mensagem/enviar';
 
 const ETAPAS = [
   { id: 'requisicao', rotulo: 'Requisição iniciada' },
@@ -30,29 +30,22 @@ class SendError extends Error {
 }
 
 /** Monta o texto — 100% controlado pelo servidor. O visitante só pode influenciar o apelido (validado). */
-function buildMessage({ apelido, acertos, total, classificacao, random = Math.random }) {
+function buildMessage({ apelido, random = Math.random }) {
   const saudacao = apelido ? `Olá, ${apelido}! 👋` : 'Olá! 👋';
-  const motivadora = pick(MENSAGENS_ALEATORIAS, random);
-  const especifica = pick(MENSAGENS_POR_CLASSIFICACAO[classificacao.id], random);
   return [
     `${saudacao} Aqui é a *BACK-END EXPERIENCE* — Feira de Profissões 2026.`,
     '',
-    `${classificacao.emoji} Você acertou *${acertos} de ${total}* no quiz e conquistou o título:`,
-    `*${classificacao.titulo}*`,
+    pick(MENSAGENS_ALEATORIAS, random),
     '',
-    especifica,
-    '',
-    motivadora,
-    '',
-    '_Mensagem enviada uma única vez, a seu pedido, pelo servidor que você acabou de ver funcionando. Não enviaremos outras. Os títulos do quiz são apenas uma brincadeira._',
+    '_Mensagem enviada uma única vez, a seu pedido, pelo servidor que você acabou de ver funcionando. Não enviaremos outras._',
   ].join('\n');
 }
 
 /**
- * Orquestra o envio do resultado: validações síncronas (respondem com 4xx/5xx na hora)
- * e um pipeline assíncrono cujos estados são os REAIS (consultáveis via GET /api/quiz/envio/:id).
+ * Orquestra o envio da mensagem: validações síncronas (respondem com 4xx/5xx na hora)
+ * e um pipeline assíncrono cujos estados são os REAIS (consultáveis via GET /api/mensagem/envio/:id).
  */
-function createSender({ config, whatsapp, quiz, logger, now = Date.now, random = Math.random }) {
+function createSender({ config, whatsapp, logger, now = Date.now, random = Math.random }) {
   // Estado de execução (tudo em memória — nada é gravado em disco).
   const state = {
     demo: !!config.demoMode,
@@ -90,7 +83,7 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
 
   const canSendForReal = () => !state.demo && whatsapp?.isReady?.();
 
-  function newJob({ simulado, apelido, acertos, total, numeroExibicao }) {
+  function newJob({ simulado, apelido, numeroExibicao }) {
     const id = crypto.randomBytes(9).toString('base64url');
     const t = now();
     const job = {
@@ -101,16 +94,14 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
       estado: 'processando',
       etapas: ETAPAS.map((e) => ({ ...e, status: 'pendente', em: null, detalhe: null })),
       entrega: { estado: simulado ? 'nao-aplicavel' : 'aguardando', ack: null },
-      http: { metodo: 'POST', rota: '/api/quiz/enviar-resultado', status: 202 },
+      http: { metodo: 'POST', rota: ROTA, status: 202 },
       requisicao: { // apenas dados não sensíveis, exibidos no painel técnico
-        sessionId: null,
         apelido: apelido || null,
         telefone: numeroExibicao,
         consentimento: true,
       },
       resposta: null,
       erro: null,
-      acertos, total,
       messageId: null,
       hashNumero: null,
       reservado: false,
@@ -126,20 +117,6 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
     e.em = now() - job.criadoEm;
     if (detalhe) e.detalhe = detalhe;
     job.atualizadoEm = now();
-  }
-
-  function fail(job, id, err) {
-    const status = err.codigo === 'WHATSAPP_INDISPONIVEL' ? 503 : (err.status || 502);
-    mark(job, id, 'erro', friendly(err)); // nunca expõe a mensagem interna da biblioteca ao navegador
-    job.erro = { codigo: err.codigo || 'FALHA_ENVIO', mensagem: friendly(err) };
-    logger.error(`detalhe interno do envio ${job.id}: ${String(err.message).replace(/\d{8,}/g, '***').slice(0, 200)}`, 'DETALHE');
-    job.http = { ...job.http, status };
-    job.estado = 'falhou';
-    job.resposta = { status, corpo: { erro: job.erro } };
-    // Falhou antes de a biblioteca aceitar o envio: libera a reserva para o visitante tentar de novo.
-    if (job.reservado && !job.messageId) release(job);
-    state.contadores.falhas += 1;
-    logger.error(`envio ${job.id} falhou na etapa "${id}" (${job.erro.codigo})`, job.erro.codigo);
   }
 
   function friendly(err) {
@@ -158,8 +135,20 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
     const i = janelaHora.indexOf(job.criadoEm);
     if (i >= 0) janelaHora.splice(i, 1);
     job.reservado = false;
-    const s = job.sessao;
-    if (s) s.envioIniciado = false;
+  }
+
+  function fail(job, id, err) {
+    const status = err.codigo === 'WHATSAPP_INDISPONIVEL' ? 503 : (err.status || 502);
+    mark(job, id, 'erro', friendly(err)); // nunca expõe a mensagem interna da biblioteca ao navegador
+    job.erro = { codigo: err.codigo || 'FALHA_ENVIO', mensagem: friendly(err) };
+    logger.error(`detalhe interno do envio ${job.id}: ${String(err.message).replace(/\d{8,}/g, '***').slice(0, 200)}`, 'DETALHE');
+    job.http = { ...job.http, status };
+    job.estado = 'falhou';
+    job.resposta = { status, corpo: { erro: job.erro } };
+    // Falhou antes de a biblioteca aceitar o envio: libera a reserva para o visitante tentar de novo.
+    if (job.reservado && !job.messageId) release(job);
+    state.contadores.falhas += 1;
+    logger.error(`envio ${job.id} falhou na etapa "${id}" (${job.erro.codigo})`, job.erro.codigo);
   }
 
   async function withTimeout(promise, ms) {
@@ -179,7 +168,7 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
       await pause();
 
       atual = 'dados';
-      mark(job, 'dados', 'ok', 'Corpo JSON lido, consentimento presente, pontuação conferida no servidor');
+      mark(job, 'dados', 'ok', 'Corpo JSON lido e consentimento presente');
       await pause();
 
       // --- Número ---
@@ -199,10 +188,7 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
       // --- Mensagem ---
       atual = 'mensagem';
       mark(job, 'mensagem', 'executando');
-      const texto = buildMessage({
-        apelido: ctx.apelido, acertos: job.acertos, total: job.total,
-        classificacao: ctx.classificacao, random,
-      });
+      const texto = buildMessage({ apelido: ctx.apelido, random });
       mark(job, 'mensagem', 'ok', `Texto escolhido pelo servidor (${texto.length} caracteres)`);
       await pause();
 
@@ -242,7 +228,7 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
    * Valida e inicia o envio. Retorna { status, body } — 4xx/5xx imediatos quando algo está errado,
    * ou 202 com o jobId quando o pipeline foi iniciado.
    */
-  function submit({ sessionId, telefone, apelido, consentimento }) {
+  function submit({ telefone, apelido, consentimento } = {}) {
     cleanupJobs();
     const bloqueio = (status, codigo, mensagem) => {
       state.contadores.bloqueados += 1;
@@ -252,12 +238,6 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
     if (consentimento !== true) {
       return bloqueio(400, 'CONSENTIMENTO_OBRIGATORIO', 'Marque a caixa de consentimento para receber a mensagem.');
     }
-    const s = quiz.getSession(sessionId);
-    if (!s) return bloqueio(404, 'SESSAO_NAO_ENCONTRADA', 'Quiz não encontrado ou expirado. Jogue novamente.');
-    const res = quiz.result(sessionId);
-    if (res.status !== 200) return bloqueio(res.status, res.codigo, res.mensagem);
-    if (s.envioIniciado) return bloqueio(409, 'ENVIO_JA_SOLICITADO', 'O resultado desta partida já foi enviado.');
-
     const tel = normalizeBrazilianMobile(telefone);
     if (!tel.ok) return bloqueio(422, 'NUMERO_INVALIDO', tel.motivo);
     const nick = sanitizeNickname(apelido);
@@ -279,43 +259,27 @@ function createSender({ config, whatsapp, quiz, logger, now = Date.now, random =
       return bloqueio(429, 'LIMITE_GLOBAL', 'Muitos envios na última hora. Tente novamente em alguns minutos.');
     }
 
-    // Reserva (anti-duplicidade): 1 envio por partida e N por número.
+    // Reserva (anti-duplicidade): no máximo N envios por número, e um só em andamento por vez.
     porNumero.set(h, (porNumero.get(h) || 0) + 1);
-    s.envioIniciado = true;
 
     const simulado = state.demo;
-    const job = newJob({
-      simulado, apelido: nick.value, acertos: res.body.acertos, total: res.body.total,
-      numeroExibicao: maskForDisplay(tel.digits),
-    });
+    const job = newJob({ simulado, apelido: nick.value, numeroExibicao: maskForDisplay(tel.digits) });
     janelaHora.push(job.criadoEm);
-    job.requisicao.sessionId = `${sessionId.slice(0, 6)}…`;
     job.hashNumero = h;
     job.reservado = true;
-    job.sessao = s;
 
     // Em modo demo ninguém recebe nada, então não consome cota do número.
     if (simulado) release(job);
 
-    run(job, {
-      digits: tel.digits, apelido: nick.value,
-      classificacao: res.body.classificacao, mascara: maskForLog(tel.digits),
-    });
+    run(job, { digits: tel.digits, apelido: nick.value, mascara: maskForLog(tel.digits) });
     return { status: 202, body: { jobId: job.id, simulado, status: 'aceito' } };
   }
 
-  /** Fluxo de demonstração da seção "Demonstração": sempre simulado, sem número e sem WhatsApp. */
+  /** Fluxo da seção Mensagem sem número: sempre simulado, sem WhatsApp. */
   function simulate() {
     cleanupJobs();
-    const job = newJob({
-      simulado: true, apelido: 'Visitante', acertos: 7, total: config.quizSize,
-      numeroExibicao: '+55 16 9****-0000',
-    });
-    job.requisicao.sessionId = 'demo…';
-    run(job, {
-      digits: '5516900000000', apelido: 'Visitante',
-      classificacao: quiz.classify(7), mascara: 'demo',
-    });
+    const job = newJob({ simulado: true, apelido: 'Visitante', numeroExibicao: '+55 16 9****-0000' });
+    run(job, { digits: '5516900000000', apelido: 'Visitante', mascara: 'demo' });
     return { status: 202, body: { jobId: job.id, simulado: true, status: 'aceito' } };
   }
 

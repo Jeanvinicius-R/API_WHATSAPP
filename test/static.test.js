@@ -15,7 +15,7 @@ fs.writeFileSync(path.join(out, 'package.json'), '{"type":"module"}'); // só pa
 test.after(() => fs.rmSync(out, { recursive: true, force: true }));
 
 test('build gera os arquivos necessários e marca o index como estático', () => {
-  for (const f of ['index.html', 'css/style.css', 'js/app.js', 'js/static-api.js', 'js/validation.mjs', 'data/static-data.json', 'data/salarios.json', '.nojekyll']) {
+  for (const f of ['index.html', 'css/style.css', 'js/app.js', 'js/static-api.js', 'js/validation.mjs', 'data/salarios.json', '.nojekyll']) {
     assert.ok(fs.existsSync(path.join(out, f)), f);
   }
   const html = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
@@ -32,7 +32,7 @@ test('o index.html do servidor continua em modo "server"', () => {
   assert.match(html, /content="server"/);
 });
 
-test('back-end simulado: quiz completo + envio simulado com estados reais da simulação', async () => {
+test('back-end simulado: validações + envio simulado com estados reais da simulação', async () => {
   const realFetch = global.fetch;
   global.fetch = async (url) => {
     const body = fs.readFileSync(path.join(out, String(url)), 'utf8');
@@ -45,33 +45,19 @@ test('back-end simulado: quiz completo + envio simulado com estados reais da sim
     const st = await call('/api/status');
     assert.equal(st.data.estatico, true);
     assert.equal(st.data.modo, 'simulado');
-    assert.ok(st.data.perguntasNoBanco >= 20);
     assert.ok((await call('/api/salarios')).data.paises.length >= 4);
 
-    const game = (await call('/api/quiz/iniciar', 'POST', {})).data;
-    assert.equal(game.perguntas.length, 8);
-    assert.ok(!JSON.stringify(game).includes('"correta"'));
-    assert.equal((await call(`/api/quiz/resultado/${game.sessionId}`)).status, 409);
-    for (const p of game.perguntas) {
-      const r = await call('/api/quiz/responder', 'POST', { sessionId: game.sessionId, perguntaId: p.id, escolha: 0 });
-      assert.equal(r.status, 200);
-      assert.equal((await call('/api/quiz/responder', 'POST', { sessionId: game.sessionId, perguntaId: p.id, escolha: 1 })).status, 409);
-    }
-    const res = (await call(`/api/quiz/resultado/${game.sessionId}`)).data;
-    assert.equal(res.total, 8);
-    assert.ok(res.classificacao.titulo);
-
-    const base = { sessionId: game.sessionId, telefone: '(16) 99123-4567', apelido: 'Ana', consentimento: true };
-    assert.equal((await call('/api/quiz/enviar-resultado', 'POST', { ...base, consentimento: false })).status, 400);
-    assert.equal((await call('/api/quiz/enviar-resultado', 'POST', { ...base, telefone: '123' })).data.erro.codigo, 'NUMERO_INVALIDO');
-    assert.equal((await call('/api/quiz/enviar-resultado', 'POST', { ...base, apelido: '*x*' })).data.erro.codigo, 'APELIDO_INVALIDO');
-    const ok = await call('/api/quiz/enviar-resultado', 'POST', base);
+    const base = { telefone: '(16) 99123-4567', apelido: 'Ana', consentimento: true };
+    assert.equal((await call('/api/mensagem/enviar', 'POST', { ...base, consentimento: false })).status, 400);
+    assert.equal((await call('/api/mensagem/enviar', 'POST', { ...base, telefone: '123' })).data.erro.codigo, 'NUMERO_INVALIDO');
+    assert.equal((await call('/api/mensagem/enviar', 'POST', { ...base, apelido: '*x*' })).data.erro.codigo, 'APELIDO_INVALIDO');
+    const ok = await call('/api/mensagem/enviar', 'POST', base);
     assert.equal(ok.status, 202);
     assert.equal(ok.data.simulado, true);
 
     let job;
     for (let i = 0; i < 100; i++) {
-      job = (await call(`/api/quiz/envio/${ok.data.jobId}`)).data;
+      job = (await call(`/api/mensagem/envio/${ok.data.jobId}`)).data;
       if (job.estado !== 'processando') break;
       await new Promise((r) => setTimeout(r, 50));
     }
@@ -85,7 +71,7 @@ test('back-end simulado: quiz completo + envio simulado com estados reais da sim
 
     const demo = (await call('/api/demo/simular', 'POST', {})).data;
     assert.equal(demo.simulado, true);
-    assert.equal((await call('/api/quiz/envio/inexistente')).status, 404);
+    assert.equal((await call('/api/mensagem/envio/inexistente')).status, 404);
   } finally {
     global.fetch = realFetch;
   }

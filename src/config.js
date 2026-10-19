@@ -31,9 +31,7 @@ function loadConfig(env = process.env, argv = []) {
     sendRateLimitPerMinute: toInt(env.SEND_RATE_LIMIT_PER_MINUTE, 10),
     stepPauseMs: toInt(env.STEP_PAUSE_MS, 450),
     sendTimeoutMs: 30_000,
-    sessionTtlMs: 30 * 60 * 1000,
     jobTtlMs: 15 * 60 * 1000,
-    quizSize: 8,
   };
 }
 

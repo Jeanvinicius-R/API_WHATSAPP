@@ -1,5 +1,5 @@
 // "O QUE ACONTECE POR TRÁS DO BOTÃO?" — visualização do fluxo REAL do back-end.
-// Cada etapa só aparece como concluída quando o servidor (GET /api/quiz/envio/:id) a reporta como "ok".
+// Cada etapa só aparece como concluída quando o servidor (GET /api/mensagem/envio/:id) a reporta como "ok".
 import { $, h, icon, api, sleep } from './util.js';
 
 const NODES = [
@@ -22,8 +22,7 @@ const HTTP_TEXT = {
 // Em qual etapa uma recusa imediata (4xx/5xx) do servidor "para" o fluxo.
 const FAIL_STEP = {
   MUITAS_REQUISICOES: 'requisicao', SEM_CONEXAO: 'requisicao', JSON_INVALIDO: 'requisicao', PAYLOAD_GRANDE: 'requisicao',
-  CONSENTIMENTO_OBRIGATORIO: 'dados', SESSAO_NAO_ENCONTRADA: 'dados', QUIZ_INCOMPLETO: 'dados',
-  ENVIO_JA_SOLICITADO: 'dados', APELIDO_INVALIDO: 'dados',
+  CONSENTIMENTO_OBRIGATORIO: 'dados', APELIDO_INVALIDO: 'dados',
   NUMERO_INVALIDO: 'numero', LIMITE_NUMERO: 'numero', LIMITE_GLOBAL: 'numero',
   WHATSAPP_INDISPONIVEL: 'integracao',
 };
@@ -67,7 +66,7 @@ export function createPipeline(root, { title = 'O QUE ACONTECE POR TRÁS DO BOT�
   const delivery = h('div', { class: 'delivery', hidden: true, 'aria-live': 'polite' });
   const reqPre = h('pre', {}, h('span', { class: 't-mut' }, 'Aguardando o envio…'));
   const resPre = h('pre', {}, h('span', { class: 't-mut' }, 'Aguardando o envio…'));
-  const reqLine = h('div', { class: 'http-line' }, h('span', { class: 'method' }, 'POST'), h('span', {}, '/api/quiz/enviar-resultado'));
+  const reqLine = h('div', { class: 'http-line' }, h('span', { class: 'method' }, 'POST'), h('span', {}, '/api/mensagem/enviar'));
   const resLine = h('div', { class: 'http-line' }, h('span', { class: 't-mut' }, 'Resposta do servidor'));
 
   root.append(
@@ -207,7 +206,7 @@ export async function runAndTrack(pipe, { requestPreview, simulado, post, onJob 
   let job = null;
   // 1) acompanha o processamento
   for (;;) {
-    const r = await api(`/api/quiz/envio/${encodeURIComponent(jobId)}`);
+    const r = await api(`/api/mensagem/envio/${encodeURIComponent(jobId)}`);
     if (r.status !== 200) {
       if (++failures > 6) return { ok: false, status: r.status, erro: r.data?.erro };
       await sleep(500);
@@ -226,7 +225,7 @@ export async function runAndTrack(pipe, { requestPreview, simulado, post, onJob 
     const limit = Date.now() + 20_000;
     while (!['entregue', 'lida', 'erro'].includes(job.entrega.estado) && Date.now() < limit) {
       await sleep(1000);
-      const r = await api(`/api/quiz/envio/${encodeURIComponent(jobId)}`);
+      const r = await api(`/api/mensagem/envio/${encodeURIComponent(jobId)}`);
       if (r.status === 200) { job = r.data; pipe.update(job); }
     }
     if (!['entregue', 'lida', 'erro'].includes(job.entrega.estado)) {

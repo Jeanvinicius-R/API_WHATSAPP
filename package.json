@@ -1,7 +1,7 @@
 {
   "name": "backend-experience",
   "version": "1.0.0",
-  "description": "BACK-END EXPERIENCE — experiência interativa para a Feira de Profissões 2026, com envio real de resultado do quiz via WhatsApp.",
+  "description": "BACK-END EXPERIENCE — experiência interativa para a Feira de Profissões 2026, com envio real de mensagem via WhatsApp.",
   "main": "src/server.js",
   "private": true,
   "license": "UNLICENSED",

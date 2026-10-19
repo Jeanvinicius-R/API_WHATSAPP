@@ -33,6 +33,8 @@ if (createApp) {
     return { cfg, logger, wa, sender, server, base, call, close: () => new Promise((r) => server.close(r)) };
   }
 
+  const envio = (extra = {}) => ({ telefone: '(16) 99123-4567', apelido: 'Ana', consentimento: true, ...extra });
+
   test('status, salários e arquivos estáticos', async () => {
     const t = await boot();
     try {
@@ -40,7 +42,6 @@ if (createApp) {
       assert.equal(st.status, 200);
       assert.equal(st.json.modo, 'real');
       assert.equal(st.json.envioDisponivel, true);
-      assert.ok(st.json.perguntasNoBanco >= 20);
       assert.ok(!st.text.toLowerCase().includes('qr'));
 
       const sal = await t.call('/api/salarios');
@@ -59,39 +60,31 @@ if (createApp) {
       assert.match(home.text, /BACK-END/);
       assert.match(home.headers.get('content-security-policy') || '', /script-src 'self'/);
       assert.equal((await t.call('/api/nao-existe')).status, 404);
+      assert.equal((await t.call('/api/quiz/iniciar', { method: 'POST', body: {} })).status, 404); // removido
       assert.equal((await t.call('/.env')).status, 404);
       assert.equal((await t.call('/.wwebjs_auth/session')).status, 404);
     } finally { await t.close(); }
   });
 
-  test('fluxo completo pela API: quiz → envio → acompanhamento dos estados', async () => {
+  test('fluxo completo pela API: envio → acompanhamento dos estados', async () => {
     const t = await boot();
     try {
-      const { json: game } = await t.call('/api/quiz/iniciar', { method: 'POST', body: {} });
-      assert.equal(game.perguntas.length, 8);
-      for (const p of game.perguntas) {
-        const r = await t.call('/api/quiz/responder', { method: 'POST', body: { sessionId: game.sessionId, perguntaId: p.id, escolha: 0 } });
-        assert.equal(r.status, 200);
-        assert.equal(typeof r.json.acertou, 'boolean');
-        assert.ok(r.json.explicacao);
-      }
-      const res = await t.call(`/api/quiz/resultado/${game.sessionId}`);
-      assert.equal(res.status, 200);
-      assert.equal(res.json.total, 8);
-
-      const bad = await t.call('/api/quiz/enviar-resultado', { method: 'POST', body: { sessionId: game.sessionId, telefone: '(16) 99123-4567', consentimento: false } });
+      const bad = await t.call('/api/mensagem/enviar', { method: 'POST', body: envio({ consentimento: false }) });
       assert.equal(bad.status, 400);
+      assert.equal(bad.json.erro.codigo, 'CONSENTIMENTO_OBRIGATORIO');
 
-      const ok = await t.call('/api/quiz/enviar-resultado', { method: 'POST', body: { sessionId: game.sessionId, telefone: '(16) 99123-4567', apelido: 'Ana', consentimento: true } });
+      const ok = await t.call('/api/mensagem/enviar', { method: 'POST', body: envio() });
       assert.equal(ok.status, 202);
       const job = await waitForJob(t.sender, ok.json.jobId);
       assert.equal(job.estado, 'concluido');
-      const viaHttp = await t.call(`/api/quiz/envio/${ok.json.jobId}`);
+      const viaHttp = await t.call(`/api/mensagem/envio/${ok.json.jobId}`);
       assert.equal(viaHttp.status, 200);
       assert.ok(!viaHttp.text.includes('991234567'));
       assert.equal(t.wa.sent.length, 1);
 
-      assert.equal((await t.call('/api/quiz/envio/inexistente')).status, 404);
+      const again = await t.call('/api/mensagem/enviar', { method: 'POST', body: envio() });
+      assert.equal(again.status, 429);
+      assert.equal((await t.call('/api/mensagem/envio/inexistente')).status, 404);
     } finally { await t.close(); }
   });
 
@@ -100,13 +93,20 @@ if (createApp) {
     try {
       const codes = [];
       for (let i = 0; i < 4; i++) {
-        const r = await t.call('/api/quiz/enviar-resultado', { method: 'POST', body: { sessionId: 'x', telefone: '1', consentimento: true } });
+        const r = await t.call('/api/mensagem/enviar', { method: 'POST', body: { telefone: '1', consentimento: true } });
         codes.push(r.status);
       }
-      assert.deepEqual(codes.slice(0, 2), [404, 404]);
-      assert.deepEqual(codes.slice(2), [429, 429]);
+      assert.deepEqual(codes, [422, 422, 429, 429]);
 
-      const res = await fetch(`${t.base}/api/quiz/responder`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{quebrado' });
+      const res = await fetch(`${t.base}/api/mensagem/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{quebrado' });
+      assert.ok([400, 429].includes(res.status));
+    } finally { await t.close(); }
+  });
+
+  test('JSON inválido devolve erro amigável', async () => {
+    const t = await boot();
+    try {
+      const res = await fetch(`${t.base}/api/mensagem/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{quebrado' });
       assert.equal(res.status, 400);
       assert.equal((await res.json()).erro.codigo, 'JSON_INVALIDO');
     } finally { await t.close(); }
@@ -117,9 +117,7 @@ if (createApp) {
     const t = await boot({ wa });
     try {
       assert.equal((await t.call('/api/status')).json.envioDisponivel, false);
-      const { json: game } = await t.call('/api/quiz/iniciar', { method: 'POST', body: {} });
-      for (const p of game.perguntas) await t.call('/api/quiz/responder', { method: 'POST', body: { sessionId: game.sessionId, perguntaId: p.id, escolha: 1 } });
-      const r = await t.call('/api/quiz/enviar-resultado', { method: 'POST', body: { sessionId: game.sessionId, telefone: '(16) 99123-4567', consentimento: true } });
+      const r = await t.call('/api/mensagem/enviar', { method: 'POST', body: envio() });
       assert.equal(r.status, 503);
       assert.equal(r.json.erro.codigo, 'WHATSAPP_INDISPONIVEL');
       assert.equal(wa.sent.length, 0);

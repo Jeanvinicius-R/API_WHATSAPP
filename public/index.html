@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="BACK-END EXPERIENCE — descubra o que acontece por trás de cada clique. Experiência interativa da Feira de Profissões 2026.">
+  <meta name="description" content="BACK-END EXPERIENCE — descubra o que acontece por trás de cada clique. Feira de Profissões 2026.">
   <meta name="theme-color" content="#050a14">
   <!-- "server" = servidor Express real; o build do GitHub Pages troca para "static" (back-end simulado no navegador) -->
   <meta name="be-mode" content="server">
@@ -30,100 +30,44 @@
     <!-- ===================== 1 · INÍCIO ===================== -->
     <section class="scene" id="inicio" data-title="Início" aria-label="Início">
       <div class="wrap hero">
-       <div class="hero-main">
-        <div>
-          <p class="eyebrow reveal" style="--i:0">Feira de Profissões 2026 · Desenvolvimento Back-end</p>
-          <h1 class="hero-title reveal grad" style="--i:1">BACK-END<br>EXPERIENCE</h1>
-          <p class="hero-sub reveal" style="--i:2">O que acontece por trás de cada clique?</p>
-          <div class="btn-row reveal" style="--i:3">
-            <button class="btn btn-primary btn-lg" data-go="profissao" id="ctaExplorar"><span data-icon="compass"></span> EXPLORAR O UNIVERSO BACK-END</button>
-            <button class="btn btn-lg" data-go="quiz" id="ctaQuiz"><span data-icon="zap"></span> TESTAR MEUS CONHECIMENTOS</button>
-          </div>
-        </div>
-
-        <div class="panel glow reveal" style="--i:4" aria-label="Animação: uma requisição indo do dispositivo ao servidor e voltando">
-          <div class="flow" id="heroFlow" data-step="0">
-            <div class="flow-row" style="grid-column:1/-1">
-              <div class="node" data-n="client"><div class="box" data-icon="smartphone" data-big></div><b>VOCÊ</b><small>clica em “Comprar”</small></div>
-              <div class="track" id="tr1"><span class="packet" id="pk1"></span></div>
-              <div class="node" data-n="server"><div class="box" data-icon="server" data-big></div><b>SERVIDOR / API</b><small id="srvSmall">aguardando…</small></div>
-              <div class="track" id="tr2"><span class="packet" id="pk2"></span></div>
-              <div class="node" data-n="db"><div class="box" data-icon="database" data-big></div><b>BANCO DE DADOS</b><small>pedidos, usuários…</small></div>
+        <div class="hero-main">
+          <div>
+            <p class="eyebrow reveal" style="--i:0">Feira de Profissões 2026 · Desenvolvimento Back-end</p>
+            <h1 class="hero-title reveal grad" style="--i:1">BACK-END<br>EXPERIENCE</h1>
+            <p class="hero-sub reveal" style="--i:2">O que acontece por trás de cada clique?</p>
+            <div class="btn-row reveal" style="--i:3">
+              <button class="btn btn-primary btn-lg" data-go="linguagens" id="ctaLinguagens"><span data-icon="code"></span> VER AS LINGUAGENS</button>
+              <button class="btn btn-lg" data-go="mensagem" id="ctaMensagem"><span data-icon="whatsapp"></span> RECEBER UMA MENSAGEM</button>
             </div>
           </div>
-          <p class="flow-caption" id="heroCaption" aria-live="off"></p>
-        </div>
-       </div>
 
-        <div class="grid-2 cols">
-          <div class="terminal reveal" style="--i:5">
-            <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>&nbsp;terminal — api.minhaloja.dev</span></div>
-            <pre id="heroTerm" class="caret" aria-hidden="true"></pre>
-          </div>
-          <div class="counters reveal" style="--i:6" id="heroCounters"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== 2 · PROFISSÃO ===================== -->
-    <section class="scene" id="profissao" data-title="Profissão" aria-label="O que é back-end">
-      <div class="wrap">
-        <p class="eyebrow reveal" style="--i:0">A profissão</p>
-        <h2 class="title reveal" style="--i:1">O que acontece quando você <span class="grad">faz login, envia uma mensagem ou compra</span> pela internet?</h2>
-        <p class="lead reveal" style="--i:2">A tela que você vê é só a vitrine. Quem recebe o pedido, confere as regras, guarda os dados e responde é o <b>back-end</b> — o “motor” invisível dos aplicativos. Quem constrói esse motor é a pessoa desenvolvedora back-end.</p>
-
-        <div class="cols" style="margin-top:1.5rem">
-          <div class="panel reveal" style="--i:3">
-            <h3>O que uma pessoa back-end faz</h3>
-            <p class="mut small">Toque em um item para entender.</p>
-            <div class="resp-grid" id="respGrid"></div>
-            <p class="resp-detail" id="respDetail" aria-live="polite">Escolha um item acima para ver como ele aparece no dia a dia.</p>
-          </div>
-
-          <div class="panel login-card reveal" style="--i:4" id="loginSim">
-            <div class="pipe-title"><h3 style="margin:0">Simulador de login</h3><span class="badge sim">Simulação educativa</span></div>
-            <p class="mut small" style="margin-top:.5rem">Nada aqui é enviado a lugar nenhum e <b>nenhuma senha é lida ou guardada</b>: é só uma animação para mostrar o caminho dos dados.</p>
-            <div class="field"><label for="simUser">Usuário</label><input id="simUser" class="input" value="visitante" autocomplete="off" spellcheck="false"></div>
-            <div class="field"><label for="simPass">Senha</label><input id="simPass" class="input" type="password" value="••••••••" autocomplete="off"></div>
-            <div class="btn-row">
-              <button class="btn btn-primary" id="simLogin"><span data-icon="play"></span> Entrar</button>
-              <button class="btn" id="simLoginFail"><span data-icon="x"></span> Simular senha errada</button>
+          <div class="panel glow reveal" style="--i:4" aria-label="Animação: uma requisição indo do dispositivo ao servidor e voltando">
+            <div class="flow" id="heroFlow" data-step="0">
+              <div class="flow-row" style="grid-column:1/-1">
+                <div class="node" data-n="client"><div class="box" data-icon="smartphone" data-big></div><b>VOCÊ</b><small>clica em “Enviar”</small></div>
+                <div class="track" id="tr1"><span class="packet" id="pk1"></span></div>
+                <div class="node" data-n="server"><div class="box" data-icon="server" data-big></div><b>SERVIDOR / API</b><small id="srvSmall">aguardando…</small></div>
+                <div class="track" id="tr2"><span class="packet" id="pk2"></span></div>
+                <div class="node" data-n="db"><div class="box" data-icon="database" data-big></div><b>BANCO DE DADOS</b><small>pedidos, usuários…</small></div>
+              </div>
             </div>
-            <div class="mini-flow" id="simFlow" aria-hidden="true"></div>
-            <ol class="steps" id="simSteps"></ol>
-            <div class="terminal" style="margin-top:.9rem"><div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>&nbsp;log do servidor (simulado)</span></div><pre id="simLog" class="t-mut">Clique em “Entrar” para ver o que o servidor faria.</pre></div>
+            <p class="flow-caption" id="heroCaption" aria-live="off"></p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===================== 3 · ROTINA ===================== -->
-    <section class="scene" id="rotina" data-title="Rotina" aria-label="Rotina de um desenvolvedor">
+    <!-- ===================== 2 · LINGUAGENS ===================== -->
+    <section class="scene" id="linguagens" data-title="Linguagens" aria-label="Linguagens de back-end">
       <div class="wrap">
-        <p class="eyebrow reveal" style="--i:0">O dia a dia</p>
-        <h2 class="title reveal" style="--i:1">Como é a rotina de <span class="grad">quem desenvolve back-end?</span></h2>
-        <p class="callout reveal" style="--i:2">⚠️ Isto é um <b>exemplo</b>, não uma agenda fixa. A rotina muda conforme a empresa, a equipe, o projeto e o momento: em dia de entrega, tem mais deploy; em dia de incidente, tem mais investigação.</p>
-
-        <div class="panel reveal" style="--i:3; margin-top:1.2rem">
-          <div class="pipe-title"><h3 style="margin:0">Um dia possível (clique nos momentos)</h3>
-            <div class="btn-row"><button class="btn" id="tlPlay"><span data-icon="play"></span> Reproduzir um dia</button></div></div>
-          <div class="timeline" id="timeline" role="tablist" aria-label="Momentos do dia"></div>
-          <div class="tl-progress" aria-hidden="true"><i id="tlBar"></i></div>
-          <div class="tl-detail" id="tlDetail" aria-live="polite" style="margin-top:1rem"></div>
-        </div>
-
-        <div class="cols" style="margin-top:1.4rem">
-          <div class="reveal" style="--i:4">
-            <h3>Problemas reais que a gente resolve</h3>
-            <p class="mut small">Escolha uma pergunta e veja como o back-end participa da solução.</p>
-            <div class="problem-list" id="problemList"></div>
-          </div>
-          <div class="panel solution reveal" style="--i:5" id="problemSolution" aria-live="polite"><p class="mut">A explicação aparece aqui.</p></div>
-        </div>
+        <p class="eyebrow reveal" style="--i:0">A caixa de ferramentas</p>
+        <h2 class="title reveal" style="--i:1">Linguagens que <span class="grad">movem o <span class="nw">back-end</span></span></h2>
+        <p class="lead reveal" style="--i:2">Não é preciso saber todas. Toque em um cartão para ver um exemplo de uso.</p>
+        <div class="tech-grid" id="techGrid"></div>
       </div>
     </section>
 
-    <!-- ===================== 4 · SALÁRIOS ===================== -->
+    <!-- ===================== 3 · SALÁRIOS ===================== -->
     <section class="scene" id="salarios" data-title="Salários" aria-label="Mercado de trabalho e salários">
       <div class="wrap">
         <p class="eyebrow reveal" style="--i:0">Mercado de trabalho</p>
@@ -151,51 +95,34 @@
       </div>
     </section>
 
-    <!-- ===================== 5 · TECNOLOGIAS ===================== -->
-    <section class="scene" id="tecnologias" data-title="Tecnologias" aria-label="Tecnologias de back-end">
-      <div class="wrap">
-        <p class="eyebrow reveal" style="--i:0">A caixa de ferramentas</p>
-        <h2 class="title reveal" style="--i:1">Tecnologias que <span class="grad">movem o back-end</span></h2>
-        <p class="lead reveal" style="--i:2">Não é preciso saber tudo. Toque em um cartão para ver um exemplo de uso.</p>
-        <div class="pills reveal" style="--i:3; margin-top:1rem" id="techFilter" role="group" aria-label="Categoria"></div>
-        <div class="tech-grid" id="techGrid"></div>
-
-        <div class="panel reveal" style="--i:4; margin-top:1.6rem">
-          <h3>Por onde começar?</h3>
-          <p class="mut small">Uma trilha possível para quem quer entrar na profissão. Toque nas etapas para marcá-las.</p>
-          <div class="trail" id="trail"></div>
-          <div class="tl-progress"><i id="trailBar"></i></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== 6 · QUIZ ===================== -->
-    <section class="scene" id="quiz" data-title="Quiz" aria-label="Quiz de back-end">
-      <div class="wrap quiz-box" id="quizRoot"></div>
-    </section>
-
-    <!-- ===================== 7 · DEMONSTRAÇÃO ===================== -->
-    <section class="scene" id="demonstracao" data-title="Demonstração" aria-label="Demonstração do back-end">
+    <!-- ===================== 4 · MENSAGEM ===================== -->
+    <section class="scene" id="mensagem" data-title="Mensagem" aria-label="Receba uma mensagem">
       <div class="wrap">
         <p class="eyebrow reveal" style="--i:0">Back-end na prática</p>
-        <h2 class="title reveal" style="--i:1">O QUE ACONTECE <span class="grad">POR TRÁS DO BOTÃO?</span></h2>
-        <p class="explain reveal" style="--i:2">Olha só! Você clicou em um botão, mas foi o <b>back-end</b> que recebeu os dados, processou tudo e pediu o envio da mensagem.</p>
+        <h2 class="title reveal" style="--i:1">Receba uma mensagem <span class="grad">no seu WhatsApp</span></h2>
+        <p class="explain reveal" style="--i:2">Olha só! Você vai clicar em um botão, mas quem recebe os dados, valida tudo e pede o envio da mensagem é o <b>back-end</b>. Acompanhe cada etapa ao lado.</p>
 
         <div class="cols" style="margin-top:1.3rem">
           <div class="panel reveal" style="--i:3">
-            <h3>Como funciona</h3>
-            <ol class="solution" style="padding-left:1.2rem;display:grid;gap:.5rem;margin:0">
-              <li>O <b>navegador</b> envia uma requisição <code>POST /api/quiz/enviar-resultado</code>.</li>
-              <li>A <b>API Express</b> lê o JSON e confere o consentimento.</li>
-              <li>A <b>validação</b> checa DDD, celular, limites e anti-duplicidade.</li>
-              <li>A <b>integração com o WhatsApp</b> (whatsapp-web.js) recebe o pedido de envio.</li>
-              <li>O resultado volta ao navegador com um <b>código HTTP</b>.</li>
-            </ol>
-            <p class="small mut" style="margin-top:1rem">Para um envio <b>real</b>, termine o quiz e peça o resultado no seu WhatsApp. Aqui você pode rodar uma <b>simulação</b> do mesmo fluxo, sem número e sem mensagem real.</p>
-            <div class="btn-row"><button class="btn btn-primary btn-lg" id="demoRun"><span data-icon="play"></span> Rodar simulação do fluxo</button>
-              <button class="btn" data-go="quiz"><span data-icon="zap"></span> Fazer o quiz</button></div>
+            <h3>Quero receber a mensagem</h3>
+            <p class="badge sim" id="msgModoBadge" hidden></p>
+            <form id="msgForm" novalidate>
+              <div class="form-grid">
+                <div><label for="fTel">Seu celular (com DDD)</label>
+                  <input class="input" id="fTel" type="tel" inputmode="tel" autocomplete="off" placeholder="(16) 99999-9999" maxlength="20" aria-describedby="fErr"></div>
+                <div><label for="fNick">Apelido (opcional)</label>
+                  <input class="input" id="fNick" type="text" autocomplete="off" maxlength="20" placeholder="Como quer ser chamado(a)?"></div>
+              </div>
+              <label class="consent"><input type="checkbox" id="fConsent"><span>Concordo em receber <b>uma única mensagem automática</b> neste número. O número é usado só para este envio e <b>não é armazenado</b>.</span></label>
+              <p class="form-err" id="fErr" role="alert"></p>
+              <div class="btn-row" style="margin-top:.6rem">
+                <button class="btn btn-primary btn-lg" id="fSend" type="submit"><span data-icon="send"></span> ENVIAR MENSAGEM</button>
+                <button class="btn" id="demoRun" type="button"><span data-icon="play"></span> Só simular o fluxo</button>
+              </div>
+            </form>
+            <p class="small mut" style="margin-top:1rem">“Só simular” percorre as mesmas etapas <b>sem número e sem enviar nada</b>, ótimo para explicar a API.</p>
           </div>
-          <div class="panel glow reveal" style="--i:4" id="demoPipe"></div>
+          <div class="panel glow reveal" style="--i:4" id="msgPipe"></div>
         </div>
       </div>
     </section>

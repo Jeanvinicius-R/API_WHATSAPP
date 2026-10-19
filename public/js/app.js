@@ -1,19 +1,16 @@
 // Orquestrador: cenas, navegação, atalhos, tela cheia, modo apresentação, reinício e status do servidor.
 import { $, $$, h, hydrateIcons, icon, api, sleep, reducedMotion, countUp, hooks } from './util.js';
 import * as hero from './hero.js';
-import * as profissao from './profissao.js';
-import * as rotina from './rotina.js';
+import * as linguagens from './linguagens.js';
 import * as salarios from './salarios.js';
-import * as tecnologias from './tecnologias.js';
-import * as quiz from './quiz.js';
-import * as demo from './demo.js';
+import * as mensagem from './mensagem.js';
 
-const SCENES = ['inicio', 'profissao', 'rotina', 'salarios', 'tecnologias', 'quiz', 'demonstracao'];
-const LABELS = { inicio: 'Início', profissao: 'Profissão', rotina: 'Rotina', salarios: 'Salários', tecnologias: 'Tecnologias', quiz: 'Quiz', demonstracao: 'Demonstração' };
-const MODULES = { inicio: hero, profissao, rotina, salarios, tecnologias, quiz, demonstracao: demo };
+const SCENES = ['inicio', 'linguagens', 'salarios', 'mensagem'];
+const LABELS = { inicio: 'Início', linguagens: 'Linguagens', salarios: 'Salários', mensagem: 'Mensagem' };
+const MODULES = { inicio: hero, linguagens, salarios, mensagem };
 
 const ctx = {
-  status: { modo: 'real', envioDisponivel: false, epoch: null, perguntasNoBanco: 0, tamanhoQuiz: 8 },
+  status: { modo: 'real', envioDisponivel: false, epoch: null },
   current: null,
   go,
   reset: resetExperience,
@@ -116,14 +113,13 @@ async function pollStatus() {
 document.addEventListener('keydown', (e) => {
   const tag = (e.target.tagName || '').toLowerCase();
   const typing = tag === 'input' || tag === 'textarea' || tag === 'select';
-  if (e.altKey && /^[1-7]$/.test(e.key)) { e.preventDefault(); go(SCENES[Number(e.key) - 1]); return; }
+  if (e.altKey && /^[1-4]$/.test(e.key)) { e.preventDefault(); go(SCENES[Number(e.key) - 1]); return; }
   if (typing || e.ctrlKey || e.metaKey) return;
   if (e.key === 'ArrowRight' || e.key === 'PageDown') step(1);
   else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { step(-1); }
   else if (e.key === 'Home') go('inicio');
   else if (e.key.toLowerCase() === 'f') togglePresentation();
   else if (e.key.toLowerCase() === 'r') resetExperience();
-  else quiz.handleKey?.(e, ctx);
 });
 
 window.addEventListener('hashchange', () => {

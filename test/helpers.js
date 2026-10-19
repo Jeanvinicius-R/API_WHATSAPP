@@ -2,7 +2,6 @@
 
 const EventEmitter = require('node:events');
 const { loadConfig } = require('../src/config');
-const { createQuizService } = require('../src/services/quiz');
 
 function testConfig(overrides = {}) {
   return { ...loadConfig({ ADMIN_TOKEN: 'token-de-teste' }), stepPauseMs: 0, sendTimeoutMs: 500, ...overrides };
@@ -38,18 +37,6 @@ function fakeWhatsApp({ ready = true, hasWhatsApp = true, failSend = false } = {
   return wa;
 }
 
-/** Joga uma partida completa. `acertos` = quantas respostas corretas dar (as demais são erradas). */
-function playQuiz(quiz, acertos = 8) {
-  const game = quiz.start();
-  const session = quiz.getSession(game.sessionId);
-  game.perguntas.forEach((p, i) => {
-    const correta = session.questions[i].correta;
-    const errada = (correta + 1) % 4;
-    quiz.answer(game.sessionId, p.id, i < acertos ? correta : errada);
-  });
-  return game.sessionId;
-}
-
 async function waitForJob(sender, jobId, { timeout = 3000 } = {}) {
   const t0 = Date.now();
   for (;;) {
@@ -60,4 +47,4 @@ async function waitForJob(sender, jobId, { timeout = 3000 } = {}) {
   }
 }
 
-module.exports = { testConfig, silentLogger, fakeWhatsApp, playQuiz, waitForJob, createQuizService };
+module.exports = { testConfig, silentLogger, fakeWhatsApp, waitForJob };

@@ -7,7 +7,6 @@
  * dentro do navegador (public/js/static-api.js). Este script junta tudo o que ele precisa a partir das
  * MESMAS fontes do servidor (sem duplicar dados à mão):
  *   _site/                      cópia de public/
- *   _site/data/static-data.json perguntas e classificações (de src/data)
  *   _site/data/salarios.json    dados salariais (de src/data)
  *   _site/js/validation.mjs     src/validation.js convertido para módulo ES
  *   _site/index.html            marcado com <meta name="be-mode" content="static">
@@ -25,9 +24,6 @@ function build(outDir = path.join(ROOT, '_site')) {
   fs.cpSync(path.join(ROOT, 'public'), outDir, { recursive: true });
   fs.mkdirSync(path.join(outDir, 'data'), { recursive: true });
 
-  const { PERGUNTAS } = require('../src/data/perguntas');
-  const { CLASSIFICACOES } = require('../src/data/mensagens');
-  fs.writeFileSync(path.join(outDir, 'data', 'static-data.json'), JSON.stringify({ perguntas: PERGUNTAS, classificacoes: CLASSIFICACOES }));
   fs.copyFileSync(path.join(ROOT, 'src', 'data', 'salarios.json'), path.join(outDir, 'data', 'salarios.json'));
 
   // Reaproveita a validação do servidor no navegador (CommonJS -> ES module).
