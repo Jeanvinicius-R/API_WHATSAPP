@@ -26,7 +26,6 @@ function loadConfig(env = process.env, argv = []) {
     whatsappEnabled: toBool(env.WHATSAPP_ENABLED, true),
     demoMode: toBool(env.DEMO_MODE, false) || argv.includes('--demo'),
     chromePath: env.CHROME_PATH || undefined,
-    publicUrl: (env.PUBLIC_URL || '').trim().replace(/\/+$/, ''), // endereço que o QR Code abre (padrão: IP do notebook na rede)
     maxSendsPerNumber: toInt(env.MAX_SENDS_PER_NUMBER, 1),
     maxSendsPerHour: toInt(env.MAX_SENDS_PER_HOUR, 40),
     sendRateLimitPerMinute: toInt(env.SEND_RATE_LIMIT_PER_MINUTE, 10),

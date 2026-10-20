@@ -27,6 +27,7 @@ function fakeWhatsApp({ ready = true, hasWhatsApp = true, failSend = false } = {
   wa.isReady = () => wa.ready;
   wa.status = () => ({ estado: wa.ready ? 'ready' : 'disconnected', pronto: wa.ready, aguardandoQr: false, ultimoErro: null });
   wa.getQrDataUrl = async () => null;
+  wa.ownNumber = () => (ready ? '5516999990000' : null);
   wa.restart = async () => {};
   wa.resolveNumber = async (digits) => (hasWhatsApp ? `${digits}@c.us` : null);
   wa.sendText = async (chatId, text) => {

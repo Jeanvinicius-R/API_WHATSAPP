@@ -15,7 +15,8 @@ const { createAdminRouter } = require('./routes/admin');
  */
 function createApp({ config, whatsapp, logger }) {
   const sender = createSender({ config, whatsapp, logger });
-  const atendimento = createAtendimento({ config });
+  const atendimento = createAtendimento({ config, whatsapp, sender, logger });
+  atendimento.start();
   const app = express();
   app.disable('x-powered-by');
 
@@ -49,7 +50,7 @@ function createApp({ config, whatsapp, logger }) {
     message: { erro: { codigo: 'MUITAS_REQUISICOES', mensagem: 'Muitas requisições. Aguarde alguns segundos.' } },
   }));
 
-  app.use('/api', createPublicRouter({ sender, atendimento, config }));
+  app.use('/api', createPublicRouter({ sender, whatsapp, atendimento }));
   app.use('/admin', createAdminRouter({ config, whatsapp, sender, logger }));
 
   app.use(express.static(path.join(__dirname, '..', 'public'), { index: 'index.html', maxAge: 0 }));

@@ -64,47 +64,42 @@ if (createApp) {
     } finally { await t.close(); }
   });
 
-  test('QR Code público aponta para a página /m.html e não expõe a autenticação do WhatsApp', async () => {
-    const t = await boot({ config: { publicUrl: 'http://192.168.0.10:3000', host: '0.0.0.0' } });
+  test('QR Code público: só com WhatsApp conectado, nunca em demonstração, e sem expor autenticação', async () => {
+    const wa = fakeWhatsApp();
+    wa.ownNumber = () => '5516999990000';
+    const t = await boot({ wa });
     try {
       const qr = await t.call('/api/mensagem/qr');
       assert.equal(qr.json.disponivel, true);
       assert.match(qr.json.qr, /^data:image\/png;base64,/);
-      assert.equal(qr.json.link, 'http://192.168.0.10:3000/m.html');
-      assert.equal(qr.json.alcance, 'rede');
-      assert.ok(!qr.text.includes('wa.me'));
+      assert.equal(qr.json.numero, '+5516999990000');
+      assert.match(qr.json.texto, /back-end/i);
+
+      t.sender.setDemo(true);
+      assert.deepEqual((await t.call('/api/mensagem/qr')).json, { disponivel: false, motivo: 'demo' });
+      t.sender.setDemo(false);
+
+      wa.ownNumber = () => null;
+      assert.equal((await t.call('/api/mensagem/qr')).json.motivo, 'whatsapp');
     } finally { await t.close(); }
-    const local = await boot({ config: { publicUrl: 'http://x', host: '127.0.0.1' } });
-    try {
-      assert.equal((await local.call('/api/mensagem/qr')).json.alcance, 'local');
-    } finally { await local.close(); }
   });
 
-  test('endereço do QR ignora adaptadores virtuais e prefere o Wi-Fi', () => {
-    const { lanAddress } = require('../src/routes/public');
-    const v4 = (address) => [{ family: 'IPv4', address, internal: false }];
-    assert.equal(lanAddress({
-      'Ethernet 2': v4('192.168.56.1'), 'vEthernet (WSL)': v4('172.22.96.1'), Ethernet: v4('10.110.12.37'),
-    }), '10.110.12.37');
-    assert.equal(lanAddress({ Ethernet: v4('10.0.0.5'), 'Wi-Fi': v4('192.168.0.20') }), '192.168.0.20');
-    assert.equal(lanAddress({ lo: [{ family: 'IPv4', address: '127.0.0.1', internal: true }] }), null);
-  });
-
-  test('página do celular existe e cada visitante conta uma vez (sem guardar dados)', async () => {
-    const t = await boot();
+  test('visitante que envia a mensagem do QR recebe a analogia do motor, uma vez, e aparece ao vivo', async () => {
+    const wa = fakeWhatsApp();
+    const t = await boot({ wa });
     try {
-      const page = await t.call('/m.html');
-      assert.equal(page.status, 200);
-      assert.match(page.text, /motor do carro/i);
       assert.equal((await t.call('/api/mensagem/ao-vivo')).json.total, 0);
-      const v1 = await t.call('/api/mensagem/visita', { method: 'POST' });
-      assert.equal(v1.json.contou, true);
-      const v2 = await t.call('/api/mensagem/visita', { method: 'POST' }); // mesmo aparelho, recarregou
-      assert.equal(v2.json.contou, false);
+      wa.emit('incoming', { chatId: '5516991234567@c.us', body: 'Oi! Quero entender o que é back-end 🚗', fromMe: false, tipo: 'chat' });
+      for (let i = 0; i < 60 && (await t.call('/api/mensagem/ao-vivo')).json.recentes[0]?.estado !== 'respondido'; i++) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
       const live = await t.call('/api/mensagem/ao-vivo');
       assert.equal(live.json.total, 1);
-      assert.equal(live.json.recentes.length, 1);
-      assert.ok(!/\d+\.\d+\.\d+\.\d+|127\.0|::1/.test(live.text), 'nenhum IP aparece');
+      assert.equal(live.json.recentes[0].estado, 'respondido');
+      assert.ok(!live.text.includes('991234567'), 'o número do visitante nunca aparece na tela');
+      assert.equal(wa.sent.length, 3);
+      assert.ok(wa.sent.every((m) => m.chatId === '5516991234567@c.us'));
+      assert.match(wa.sent[1].text, /motor do carro/i);
     } finally { await t.close(); }
   });
 

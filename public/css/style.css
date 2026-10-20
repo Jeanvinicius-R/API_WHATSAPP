@@ -368,20 +368,6 @@ body.apresentacao .dock .btn { min-height: 3.6rem; padding: .8rem 1.5rem; font-s
 .live-list li.falhou { border-color: rgba(255, 93, 115, .5); }
 .live-list small { color: var(--dim); font-family: var(--mono); }
 
-/* ---------- Página do celular (QR Code → /m.html) ---------- */
-body.mobile-page { overflow-y: auto; min-height: 100dvh; }
-.m-wrap { max-width: 40rem; margin: 0 auto; padding: max(1.5rem, env(safe-area-inset-top)) max(1.1rem, env(safe-area-inset-right)) max(3rem, env(safe-area-inset-bottom)) max(1.1rem, env(safe-area-inset-left)); }
-.m-title { font-size: clamp(1.9rem, 8vw, 2.8rem); font-weight: 900; letter-spacing: -.02em; }
-.m-lead { color: var(--mut); font-size: 1.08rem; }
-.m-steps { list-style: none; margin: 1.4rem 0; padding: 0; display: grid; gap: .9rem; }
-.m-step { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center; padding: 1rem; border-radius: var(--radius); border: 1px solid var(--line-strong); background: var(--panel); opacity: 0; transform: translateY(18px); transition: opacity .6s var(--ease), transform .7s var(--ease); }
-.m-step.in { opacity: 1; transform: none; border-color: rgba(30, 167, 255, .5); }
-.m-step .box { width: 3.4rem; aspect-ratio: 1; border-radius: 16px; display: grid; place-items: center; color: var(--cyan); background: #0d0d14; border: 1px solid rgba(30, 167, 255, .5); box-shadow: 0 0 26px rgba(30, 167, 255, .3); }
-.m-step .box svg { width: 52%; height: 52%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.m-step b { display: block; margin-bottom: .15rem; }
-.m-step p { margin: 0; color: var(--mut); font-size: .95rem; }
-.m-final h2 { font-size: 1.5rem; }
-
 /* ---------- Responsivo ---------- */
 @media (max-width: 1100px) { .brand span { display: none; } }
 /* tablet */
