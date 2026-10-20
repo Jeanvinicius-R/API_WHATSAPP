@@ -1,12 +1,12 @@
-// Cena 4 · Mensagem: QR Code que abre o WhatsApp do evento + analogia do motor + atendimentos ao vivo.
+// Cena 4 · Mensagem: QR Code que abre a página /m.html no celular do visitante + analogia do motor + visitas ao vivo.
 import { $, api, h, icon, sleep, reducedMotion } from './util.js';
 
 const ETAPAS = [
-  { ic: 'smartphone', nome: 'Painel', dica: 'você envia a mensagem', legenda: '📱 Painel: você usa o WhatsApp, a parte que dá para ver (front-end).' },
+  { ic: 'smartphone', nome: 'Painel', dica: 'você lê o QR Code', legenda: '📱 Painel: o celular e a tela, a parte que dá para ver (front-end).' },
   { ic: 'zap', nome: 'Acelerador', dica: 'a requisição', legenda: '🦶 Acelerador: seu pedido sai do celular e viaja pela internet até o servidor.' },
   { ic: 'cpu', nome: 'Motor', dica: 'o back-end', legenda: '⚙️ Motor: o back-end confere as regras e decide o que fazer.' },
   { ic: 'database', nome: 'Tanque', dica: 'os dados', legenda: '⛽ Tanque: o banco de dados guarda o que o motor precisa para trabalhar.' },
-  { ic: 'check-circle', nome: 'Velocímetro', dica: 'a resposta', legenda: '📟 Velocímetro: a resposta volta para o seu WhatsApp. Pronto!' },
+  { ic: 'check-circle', nome: 'Velocímetro', dica: 'a resposta', legenda: '📟 Velocímetro: a resposta volta para a sua tela. Pronto!' },
 ];
 
 let ctxRef;
@@ -38,16 +38,16 @@ function renderQr(info) {
   box.textContent = '';
   $('#qrNumero').textContent = '';
   if (info?.disponivel) {
-    box.append(h('img', { src: info.qr, alt: 'QR Code que abre o WhatsApp com a mensagem pronta', width: 480, height: 480 }));
-    $('#qrNumero').textContent = `Sem conseguir ler? Mande “${info.texto}” para ${info.numero}.`;
+    box.append(h('img', { src: info.qr, alt: 'QR Code que abre a explicação do back-end no celular', width: 480, height: 480 }));
+    $('#qrNumero').textContent = info.alcance === 'local'
+      ? 'Atenção: o servidor só aceita este computador. Defina HOST=0.0.0.0 no .env para os celulares abrirem o link.'
+      : `Sem conseguir ler? Digite no navegador: ${info.link}`;
     return;
   }
   const motivo = info?.estatico
     ? 'O QR Code aparece na versão do evento, com o servidor ligado. Aqui você pode ver o caminho do pedido ao lado.'
-    : info?.motivo === 'demo'
-      ? 'Modo demonstração: o QR Code fica desligado e nenhuma mensagem é enviada.'
-      : 'O WhatsApp do evento ainda não está conectado. Peça ajuda a um apresentador.';
-  box.append(h('div', { class: 'qr-off' }, icon('whatsapp'), h('p', {}, motivo)));
+    : 'Não achei o endereço do notebook na rede. Conecte-o ao Wi-Fi ou defina PUBLIC_URL no .env.';
+  box.append(h('div', { class: 'qr-off' }, icon('globe'), h('p', {}, motivo)));
 }
 
 function renderLive(data) {
@@ -56,8 +56,7 @@ function renderLive(data) {
   list.textContent = '';
   for (const r of data?.recentes || []) {
     const hora = new Date(r.em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const estado = { respondido: 'respondido ✓', respondendo: 'respondendo…', falhou: 'não foi possível responder' }[r.estado] || r.estado;
-    list.append(h('li', { class: r.estado }, h('span', {}, `Visitante #${r.n}`), h('small', {}, `${hora} · ${estado}`)));
+    list.append(h('li', { class: 'respondido' }, h('span', {}, `Visitante #${r.n}`), h('small', {}, `${hora} · abriu o QR Code`)));
   }
 }
 

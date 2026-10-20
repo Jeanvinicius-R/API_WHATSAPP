@@ -37,7 +37,7 @@
             <p class="hero-sub reveal" style="--i:2">O que acontece por trás de cada clique?</p>
             <div class="btn-row reveal" style="--i:3">
               <button class="btn btn-primary btn-lg" data-go="linguagens" id="ctaLinguagens"><span data-icon="code"></span> VER AS LINGUAGENS</button>
-              <button class="btn btn-lg" data-go="mensagem" id="ctaMensagem"><span data-icon="whatsapp"></span> RECEBER UMA MENSAGEM</button>
+              <button class="btn btn-lg" data-go="mensagem" id="ctaMensagem"><span data-icon="smartphone"></span> LER O QR CODE</button>
             </div>
           </div>
 
@@ -99,20 +99,20 @@
     <section class="scene" id="mensagem" data-title="Mensagem" aria-label="Receba uma mensagem">
       <div class="wrap">
         <p class="eyebrow reveal" style="--i:0">Back-end na prática</p>
-        <h2 class="title reveal" style="--i:1">Leia o QR Code e <span class="grad">receba uma mensagem</span></h2>
-        <p class="explain reveal" style="--i:2">🚗 O <b>back-end é o motor do carro</b>: você vê o painel e o volante, mas é o motor, escondido sob o capô, que faz tudo andar. Ao enviar a mensagem, você “pisa no acelerador” e o nosso servidor responde.</p>
+        <h2 class="title reveal" style="--i:1">Leia o QR Code e <span class="grad">descubra o back-end</span></h2>
+        <p class="explain reveal" style="--i:2">🚗 O <b>back-end é o motor do carro</b>: você vê o painel e o volante, mas é o motor, escondido sob o capô, que faz tudo andar. Ao ler o QR Code, o seu celular “pisa no acelerador” e o nosso servidor responde na hora.</p>
 
         <div class="cols" style="margin-top:1.3rem">
           <div class="panel glow qr-panel reveal" style="--i:3">
             <h3>Aponte a câmera do celular</h3>
             <div class="qr-box" id="qrBox" aria-live="polite"></div>
             <ol class="qr-steps">
-              <li>Abra a <b>câmera</b> e aponte para o QR Code.</li>
-              <li>Toque no link para abrir o <b>WhatsApp</b>.</li>
-              <li>Envie a mensagem que já está escrita e <b>aguarde a resposta</b>.</li>
+              <li>Abra a <b>câmera</b> do celular e aponte para o QR Code.</li>
+              <li>Toque no <b>link</b> que aparecer.</li>
+              <li>Veja, na hora, <b>a explicação no seu celular</b>.</li>
             </ol>
             <p class="small mut" id="qrNumero"></p>
-            <p class="small dim">Você receberá uma única sequência de mensagens. Seu número não é guardado.</p>
+            <p class="small dim">Nada é guardado: não pedimos número nem dados pessoais.</p>
           </div>
 
           <div class="panel reveal" style="--i:4">
@@ -123,7 +123,7 @@
               <button class="btn btn-primary" id="motorRun" type="button"><span data-icon="play"></span> Ligar o motor</button>
             </div>
             <div class="live" id="live">
-              <div class="live-head"><b id="liveTotal">0</b> <span>pessoas já receberam a mensagem</span></div>
+              <div class="live-head"><b id="liveTotal">0</b> <span>pessoas já abriram o QR Code</span></div>
               <ul class="live-list" id="liveList" aria-label="Últimos atendimentos"></ul>
             </div>
           </div>
