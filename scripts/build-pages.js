@@ -8,6 +8,7 @@
  * MESMAS fontes do servidor (sem duplicar dados à mão):
  *   _site/                      cópia de public/
  *   _site/data/salarios.json    dados salariais (de src/data)
+ *   _site/js/validation.mjs     src/validation.js convertido para módulo ES
  *   _site/index.html            marcado com <meta name="be-mode" content="static">
  *
  * Uso: node scripts/build-pages.js [pastaDeSaida]
@@ -24,6 +25,12 @@ function build(outDir = path.join(ROOT, '_site')) {
   fs.mkdirSync(path.join(outDir, 'data'), { recursive: true });
 
   fs.copyFileSync(path.join(ROOT, 'src', 'data', 'salarios.json'), path.join(outDir, 'data', 'salarios.json'));
+
+  // Reaproveita a validação do servidor no navegador (CommonJS -> ES module).
+  const src = fs.readFileSync(path.join(ROOT, 'src', 'validation.js'), 'utf8');
+  if (!/module\.exports = \{[^}]*\};/.test(src)) throw new Error('src/validation.js: formato de exportação inesperado');
+  const esm = src.replace(/'use strict';\n/, '').replace(/module\.exports = \{([^}]*)\};/, 'export {$1};');
+  fs.writeFileSync(path.join(outDir, 'js', 'validation.mjs'), `// GERADO por scripts/build-pages.js a partir de src/validation.js — não edite.\n${esm}`);
 
   const indexPath = path.join(outDir, 'index.html');
   const html = fs.readFileSync(indexPath, 'utf8');
