@@ -32,6 +32,7 @@ function buildChrome() {
   SCENES.forEach(() => dots.append(h('i')));
   $('#btnPresent').append(icon('maximize'));
   $('#btnReset').append(icon('rotate'));
+  syncThemeButton();
 }
 
 async function go(id, { instant = false } = {}) {
@@ -85,6 +86,22 @@ document.addEventListener('fullscreenchange', () => {
   }
 });
 
+// ----- Tema escuro / claro -----
+function syncThemeButton() {
+  const light = document.documentElement.dataset.theme === 'light';
+  const btn = $('#btnTheme');
+  btn.textContent = '';
+  btn.append(icon(light ? 'moon' : 'sun')); // mostra o tema para o qual vai trocar
+  btn.setAttribute('aria-pressed', String(light));
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#ffffff' : '#070709');
+}
+function toggleTheme() {
+  const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('tema', next); } catch { /* sem armazenamento: vale só nesta visita */ }
+  syncThemeButton();
+}
+
 // ----- Reinício para o próximo visitante -----
 function resetExperience() {
   for (const m of Object.values(MODULES)) m.reset?.(ctx);
@@ -120,6 +137,7 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'Home') go('inicio');
   else if (e.key.toLowerCase() === 'f') togglePresentation();
   else if (e.key.toLowerCase() === 'r') resetExperience();
+  else if (e.key.toLowerCase() === 't') toggleTheme();
 });
 
 window.addEventListener('hashchange', () => {
@@ -135,6 +153,7 @@ $('#btnPrev').addEventListener('click', () => step(-1));
 $('#btnNext').addEventListener('click', () => step(1));
 $('#btnPresent').addEventListener('click', () => togglePresentation());
 $('#btnReset').addEventListener('click', () => resetExperience());
+$('#btnTheme').addEventListener('click', toggleTheme);
 $$('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
 
 // Versão publicada no GitHub Pages: não há servidor, então o back-end é simulado no navegador.
