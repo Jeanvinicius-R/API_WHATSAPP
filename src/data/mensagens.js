@@ -19,6 +19,11 @@ const MENSAGENS_ALEATORIAS = [
   '☁️ Seus próximos apps podem rodar na nuvem e atender milhares de pessoas ao mesmo tempo. Vale a pena tentar!',
   '🧪 Testar, errar, ajustar, repetir. Esse é o ciclo que transforma estudantes em desenvolvedores. Boa jornada!',
   '📚 Lógica de programação → linguagem → HTTP e APIs → banco de dados → Git → primeiro projeto. A trilha está aí, é só começar!',
+  '🚗 O back-end é o motor do carro: você vê o painel e o volante (front-end), mas é o motor, escondido sob o capô, que faz tudo andar!',
+  '🦶 Quando você toca em um botão, é como pisar no acelerador: o pedido viaja até o servidor, o "motor" decide o que fazer e a resposta volta para a sua tela.',
+  '⛽ Todo motor precisa de combustível: no back-end, o combustível são os dados guardados no banco de dados. Sem eles, o app não anda!',
+  '⚙️ Ninguém vê o motor do carro enquanto dirige, mas sem ele nada funciona. Quem programa o back-end faz esse trabalho invisível e essencial.',
+  '📟 O velocímetro mostra a resposta ao motorista, assim como a tela mostra o que o back-end respondeu. Quer aprender a construir o motor? 🚀',
 ];
 
 module.exports = { MENSAGENS_ALEATORIAS };
