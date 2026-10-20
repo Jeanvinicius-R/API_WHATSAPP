@@ -1,7 +1,7 @@
 # BACK-END EXPERIENCE · Feira de Profissões 2026
 
 > **O que acontece por trás de cada clique?**
-> Apresentação curta e interativa sobre desenvolvimento **back-end**, com quatro partes: **Início**, **Linguagens**, **Salários** e **Mensagem** — nesta última, a API envia uma **mensagem real de WhatsApp** para quem estiver assistindo, enquanto a tela mostra o caminho da requisição (navegador → API Express → validação → integração WhatsApp → destinatário).
+> Apresentação curta e interativa sobre desenvolvimento **back-end**, com quatro partes: **Início**, **Linguagens**, **Salários** e **Mensagem** — nesta última, o visitante lê um **QR Code**, envia a mensagem que já vem escrita no WhatsApp e o servidor responde explicando o back-end com a analogia do **motor do carro**.
 
 **Versão online (só visualização):** https://jeanvinicius-r.github.io/API_WHATSAPP/ — veja a seção [Versão online](#versão-online-github-pages).
 
@@ -16,9 +16,9 @@
 | **Início** | Título e uma animação de uma requisição indo do dispositivo ao servidor e voltando. |
 | **Linguagens** | JavaScript/TypeScript, Python, Java, C#, PHP e Go, com descrição e exemplo de uso (cartões que viram ao toque). |
 | **Salários** | Brasil, EUA, Canadá e Alemanha, com fontes e links; Portugal aparece como "dado confiável não encontrado". |
-| **Mensagem** | O visitante informa o celular (e, se quiser, um apelido), marca o consentimento e a API envia uma mensagem motivadora. Ao lado, **"O que acontece por trás do botão?"** mostra cada etapa, a requisição `POST /api/mensagem/enviar`, o JSON e o código HTTP — todos vindos do servidor. |
+| **Mensagem** | Um **QR Code** abre o WhatsApp do evento com a mensagem pronta. Quem enviar recebe, em sequência, 3 respostas do servidor (o back-end é o motor do carro: painel = front-end, acelerador = requisição, motor = back-end, tanque = banco de dados). Ao lado, a animação **"O caminho até o motor"** e um contador ao vivo de pessoas atendidas. |
 
-Regras do envio: o texto é **sempre escolhido pelo servidor** (17 mensagens motivadoras sorteadas); o visitante só informa um apelido (apenas letras); só celulares brasileiros com DDD válido; 1 envio por número; limite por hora e por minuto; nada é guardado.
+Regras: o texto é **sempre escolhido pelo servidor** (`src/data/motor.js`); só responde a mensagens com "back-end" ou "motor" (o QR já traz o texto); **1 resposta por pessoa** e limite por hora; o contato é guardado só como hash em memória e a tela mostra apenas "Visitante #N"; nada vai para disco. Muitas pessoas podem ler o mesmo QR Code.
 
 ## 2. Tecnologias
 
@@ -67,7 +67,7 @@ A sessão fica em `.wwebjs_auth/` (no `.gitignore`); nas próximas execuções n
 
 `/admin` só responde a conexões do próprio computador e exige o token do `.env`. Permite ver o estado do WhatsApp, ler o QR Code, reiniciar a conexão, ver erros e contadores, **ativar/desativar o modo demonstração** e **reiniciar a apresentação** (as telas abertas voltam ao início em até 5 s).
 
-O **modo demonstração** simula todo o fluxo sem tocar no WhatsApp (plano B se a internet cair). Fica identificado na tela. Ative pelo `/admin`, por `npm run start:demo` ou `DEMO_MODE=true`. Na seção **Mensagem**, o botão **"Só simular o fluxo"** faz o mesmo sem pedir número.
+O **modo demonstração** não envia nem responde nada real (o QR Code fica desligado e a animação do motor continua disponível). Fica identificado na tela. Ative pelo `/admin`, por `npm run start:demo` ou `DEMO_MODE=true`.
 
 ## 8. Problemas comuns
 
@@ -84,7 +84,7 @@ O **modo demonstração** simula todo o fluxo sem tocar no WhatsApp (plano B se 
 
 ## 9. Roteiro para a feira
 
-**Antes:** `npm start` → `/admin` → conectar o WhatsApp → fazer **um envio de teste para o seu número** → abrir a apresentação em tela cheia (`F`).
+**Antes:** `npm start` → `/admin` → conectar o WhatsApp → **ler o QR da apresentação com o seu celular e conferir a resposta** → abrir a apresentação em tela cheia (`F`).
 **Durante:** deixe no *Início*; entre visitantes aperte **R**. Conte sobre *Linguagens* e *Salários* e, na *Mensagem*, peça a um voluntário para receber o WhatsApp enquanto você explica cada etapa na tela.
 **Plano B:** WhatsApp ou internet falhou? Ative o **modo demonstração** no `/admin` e continue.
 **Depois:** `Ctrl+C`. Nada é gravado em disco além da sessão do WhatsApp; números existem só em memória durante o envio.

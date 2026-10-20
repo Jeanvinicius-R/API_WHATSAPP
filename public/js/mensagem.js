@@ -1,128 +1,101 @@
-// Cena 4 · Mensagem: formulário de envio + "O que acontece por trás do botão?" com os estados reais do back-end.
-import { $, api, reducedMotion } from './util.js';
-import { createPipeline, runAndTrack } from './pipeline.js';
+// Cena 4 · Mensagem: QR Code que abre o WhatsApp do evento + analogia do motor + atendimentos ao vivo.
+import { $, api, h, icon, sleep, reducedMotion } from './util.js';
+
+const ETAPAS = [
+  { ic: 'smartphone', nome: 'Painel', dica: 'você envia a mensagem', legenda: '📱 Painel: você usa o WhatsApp, a parte que dá para ver (front-end).' },
+  { ic: 'zap', nome: 'Acelerador', dica: 'a requisição', legenda: '🦶 Acelerador: seu pedido sai do celular e viaja pela internet até o servidor.' },
+  { ic: 'cpu', nome: 'Motor', dica: 'o back-end', legenda: '⚙️ Motor: o back-end confere as regras e decide o que fazer.' },
+  { ic: 'database', nome: 'Tanque', dica: 'os dados', legenda: '⛽ Tanque: o banco de dados guarda o que o motor precisa para trabalhar.' },
+  { ic: 'check-circle', nome: 'Velocímetro', dica: 'a resposta', legenda: '📟 Velocímetro: a resposta volta para o seu WhatsApp. Pronto!' },
+];
 
 let ctxRef;
-let pipe;
-let busy = false;
+let timer = null;
+let running = false;
+let nodes = [];
 
-function maskPhone(raw) {
-  let d = raw.replace(/\D/g, '');
-  if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
-  d = d.slice(0, 11);
-  if (d.length <= 2) return d.length ? `(${d}` : '';
-  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+function setCaption(texto) {
+  $('#motorCaption').textContent = texto;
 }
 
-function previewPhone(raw) {
-  let d = raw.replace(/\D/g, '');
-  if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
-  return d.length >= 10 ? `+55 ${d.slice(0, 2)} 9****-${d.slice(-4)}` : '***';
-}
-
-function availability() {
-  const s = ctxRef.status;
-  if (s.offline) return { ok: false, text: 'Sem conexão com o servidor. Peça ajuda a um apresentador.' };
-  if (!s.envioDisponivel) return { ok: false, text: 'O envio por WhatsApp está indisponível agora. Peça ajuda a um apresentador — você ainda pode ver o fluxo em “Só simular”.' };
-  if (s.estatico) return { ok: true, sim: true, text: 'Versão online: o fluxo é simulado no seu navegador. Nenhuma mensagem é enviada e o número não sai do seu aparelho.' };
-  if (s.modo === 'simulado') return { ok: true, sim: true, text: 'Modo demonstração: nenhuma mensagem real será enviada — o fluxo é simulado.' };
-  return { ok: true, text: '' };
-}
-
-function refreshAvailability() {
-  const av = availability();
-  const badge = $('#msgModoBadge');
-  badge.hidden = !av.sim;
-  badge.textContent = av.sim ? av.text : '';
-  if (!busy) {
-    $('#fSend').disabled = !av.ok;
-    const err = $('#fErr');
-    if (!av.ok) { err.style.color = ''; err.textContent = av.text; }
-    else if (err.textContent === availability.lastBlockedText) err.textContent = '';
+async function runMotor() {
+  if (running) return;
+  running = true;
+  $('#motorRun').disabled = true;
+  nodes.forEach((n) => n.classList.remove('on', 'done'));
+  for (let i = 0; i < ETAPAS.length; i++) {
+    nodes[i].classList.add('on');
+    setCaption(ETAPAS[i].legenda);
+    await sleep(reducedMotion() ? 300 : 1300);
+    nodes[i].classList.replace('on', 'done');
   }
-  availability.lastBlockedText = av.ok ? null : av.text;
+  running = false;
+  $('#motorRun').disabled = false;
 }
 
-function clearForm() {
-  $('#fTel').value = '';
-  $('#fNick').value = '';
-  $('#fConsent').checked = false;
-}
-
-function setBusy(on) {
-  busy = on;
-  $('#fSend').disabled = on || !availability().ok;
-  $('#demoRun').disabled = on;
-}
-
-async function send() {
-  if (busy) return;
-  const err = $('#fErr');
-  err.style.color = '';
-  err.textContent = '';
-  const phone = $('#fTel');
-  const digits = phone.value.replace(/\D/g, '');
-  if (digits.length < 10) { err.textContent = 'Digite o DDD e o número do celular.'; phone.focus(); return; }
-  if (!$('#fConsent').checked) { err.textContent = 'Marque a caixa de consentimento para receber a mensagem.'; $('#fConsent').focus(); return; }
-  const av = availability();
-  if (!av.ok) { err.textContent = av.text; return; }
-
-  setBusy(true);
-  const apelido = $('#fNick').value.trim() || undefined;
-  const body = { telefone: phone.value, apelido, consentimento: true };
-  const preview = { ...(apelido ? { apelido } : {}), telefone: previewPhone(phone.value), consentimento: true };
-  $('#msgPipe').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
-
-  const result = await runAndTrack(pipe, {
-    simulado: !!av.sim,
-    requestPreview: preview,
-    post: () => api('/api/mensagem/enviar', { method: 'POST', body }),
-  });
-  setBusy(false);
-
-  if (result.ok) {
-    err.style.color = 'var(--green)';
-    err.textContent = result.job.simulado
-      ? 'Simulação concluída! Nenhuma mensagem real foi enviada.'
-      : 'Mensagem enviada! Dê uma olhada no seu WhatsApp. 🎉';
-    clearForm(); // privacidade: o próximo visitante encontra o formulário limpo
+function renderQr(info) {
+  const box = $('#qrBox');
+  box.textContent = '';
+  $('#qrNumero').textContent = '';
+  if (info?.disponivel) {
+    box.append(h('img', { src: info.qr, alt: 'QR Code que abre o WhatsApp com a mensagem pronta', width: 480, height: 480 }));
+    $('#qrNumero').textContent = `Sem conseguir ler? Mande “${info.texto}” para ${info.numero}.`;
     return;
   }
-  err.textContent = result.erro?.mensagem || result.job?.erro?.mensagem || 'Não foi possível enviar. Tente novamente.';
+  const motivo = info?.estatico
+    ? 'O QR Code aparece na versão do evento, com o servidor ligado. Aqui você pode ver o caminho do pedido ao lado.'
+    : info?.motivo === 'demo'
+      ? 'Modo demonstração: o QR Code fica desligado e nenhuma mensagem é enviada.'
+      : 'O WhatsApp do evento ainda não está conectado. Peça ajuda a um apresentador.';
+  box.append(h('div', { class: 'qr-off' }, icon('whatsapp'), h('p', {}, motivo)));
 }
 
-async function simulate() {
-  if (busy) return;
-  setBusy(true);
-  $('#fErr').textContent = '';
-  await runAndTrack(pipe, {
-    simulado: true,
-    requestPreview: { apelido: 'Visitante', telefone: '+55 16 9****-0000', consentimento: true },
-    post: () => api('/api/demo/simular', { method: 'POST', body: {} }),
-  });
-  setBusy(false);
+function renderLive(data) {
+  $('#liveTotal').textContent = String(data?.total ?? 0);
+  const list = $('#liveList');
+  list.textContent = '';
+  for (const r of data?.recentes || []) {
+    const hora = new Date(r.em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const estado = { respondido: 'respondido ✓', respondendo: 'respondendo…', falhou: 'não foi possível responder' }[r.estado] || r.estado;
+    list.append(h('li', { class: r.estado }, h('span', {}, `Visitante #${r.n}`), h('small', {}, `${hora} · ${estado}`)));
+  }
+}
+
+async function refresh() {
+  const [qr, live] = await Promise.all([api('/api/mensagem/qr'), api('/api/mensagem/ao-vivo')]);
+  if (qr.status === 200) renderQr(qr.data);
+  if (live.status === 200) renderLive(live.data);
 }
 
 export function init(ctx) {
   ctxRef = ctx;
-  pipe = createPipeline($('#msgPipe'));
-  const phone = $('#fTel');
-  phone.addEventListener('input', () => { phone.value = maskPhone(phone.value); });
-  $('#msgForm').addEventListener('submit', (e) => { e.preventDefault(); send(); });
-  $('#demoRun').addEventListener('click', simulate);
-  ctx.onStatus(refreshAvailability);
-  refreshAvailability();
+  const motor = $('#motor');
+  nodes = ETAPAS.map((e, i) => {
+    const n = h('div', { class: 'motor-node', role: 'listitem' },
+      h('div', { class: 'box' }, icon(e.ic)),
+      h('b', {}, e.nome),
+      h('small', {}, e.dica));
+    motor.append(n);
+    if (i < ETAPAS.length - 1) motor.append(h('i', { class: 'motor-link', 'aria-hidden': 'true' }));
+    return n;
+  });
+  $('#motorRun').addEventListener('click', runMotor);
 }
 
 export function onEnter() {
-  refreshAvailability();
+  refresh();
+  clearInterval(timer);
+  timer = setInterval(refresh, 3000);
+}
+
+export function onLeave() {
+  clearInterval(timer);
+  timer = null;
 }
 
 export function reset() {
-  if (busy) return;
-  clearForm();
-  $('#fErr').textContent = '';
-  pipe.reset();
-  refreshAvailability();
+  running = false;
+  $('#motorRun').disabled = false;
+  nodes.forEach((n) => n.classList.remove('on', 'done'));
+  setCaption('Toque em “Ligar o motor” para ver o caminho do seu pedido.');
 }

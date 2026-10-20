@@ -8,7 +8,7 @@
   <!-- "server" = servidor Express real; o build do GitHub Pages troca para "static" (back-end simulado no navegador) -->
   <meta name="be-mode" content="server">
   <title>Back-end Experience</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2322d3ee'/%3E%3Cpath d='M9 11l-4 5 4 5M23 11l4 5-4 5M18 8l-4 16' stroke='%2303121d' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231ea7ff'/%3E%3Cpath d='M9 11l-4 5 4 5M23 11l4 5-4 5M18 8l-4 16' stroke='%2302060d' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -99,30 +99,34 @@
     <section class="scene" id="mensagem" data-title="Mensagem" aria-label="Receba uma mensagem">
       <div class="wrap">
         <p class="eyebrow reveal" style="--i:0">Back-end na prática</p>
-        <h2 class="title reveal" style="--i:1">Receba uma mensagem <span class="grad">no seu WhatsApp</span></h2>
-        <p class="explain reveal" style="--i:2">Olha só! Você vai clicar em um botão, mas quem recebe os dados, valida tudo e pede o envio da mensagem é o <b>back-end</b>. Acompanhe cada etapa ao lado.</p>
+        <h2 class="title reveal" style="--i:1">Leia o QR Code e <span class="grad">receba uma mensagem</span></h2>
+        <p class="explain reveal" style="--i:2">🚗 O <b>back-end é o motor do carro</b>: você vê o painel e o volante, mas é o motor, escondido sob o capô, que faz tudo andar. Ao enviar a mensagem, você “pisa no acelerador” e o nosso servidor responde.</p>
 
         <div class="cols" style="margin-top:1.3rem">
-          <div class="panel reveal" style="--i:3">
-            <h3>Quero receber a mensagem</h3>
-            <p class="badge sim" id="msgModoBadge" hidden></p>
-            <form id="msgForm" novalidate>
-              <div class="form-grid">
-                <div><label for="fTel">Seu celular (com DDD)</label>
-                  <input class="input" id="fTel" type="tel" inputmode="tel" autocomplete="off" placeholder="(16) 99999-9999" maxlength="20" aria-describedby="fErr"></div>
-                <div><label for="fNick">Apelido (opcional)</label>
-                  <input class="input" id="fNick" type="text" autocomplete="off" maxlength="20" placeholder="Como quer ser chamado(a)?"></div>
-              </div>
-              <label class="consent"><input type="checkbox" id="fConsent"><span>Concordo em receber <b>uma única mensagem automática</b> neste número. O número é usado só para este envio e <b>não é armazenado</b>.</span></label>
-              <p class="form-err" id="fErr" role="alert"></p>
-              <div class="btn-row" style="margin-top:.6rem">
-                <button class="btn btn-primary btn-lg" id="fSend" type="submit"><span data-icon="send"></span> ENVIAR MENSAGEM</button>
-                <button class="btn" id="demoRun" type="button"><span data-icon="play"></span> Só simular o fluxo</button>
-              </div>
-            </form>
-            <p class="small mut" style="margin-top:1rem">“Só simular” percorre as mesmas etapas <b>sem número e sem enviar nada</b>, ótimo para explicar a API.</p>
+          <div class="panel glow qr-panel reveal" style="--i:3">
+            <h3>Aponte a câmera do celular</h3>
+            <div class="qr-box" id="qrBox" aria-live="polite"></div>
+            <ol class="qr-steps">
+              <li>Abra a <b>câmera</b> e aponte para o QR Code.</li>
+              <li>Toque no link para abrir o <b>WhatsApp</b>.</li>
+              <li>Envie a mensagem que já está escrita e <b>aguarde a resposta</b>.</li>
+            </ol>
+            <p class="small mut" id="qrNumero"></p>
+            <p class="small dim">Você receberá uma única sequência de mensagens. Seu número não é guardado.</p>
           </div>
-          <div class="panel glow reveal" style="--i:4" id="msgPipe"></div>
+
+          <div class="panel reveal" style="--i:4">
+            <h3>O caminho até o motor</h3>
+            <div class="motor" id="motor" role="list" aria-label="Etapas: da mensagem à resposta"></div>
+            <p class="motor-caption" id="motorCaption" aria-live="polite">Toque em “Ligar o motor” para ver o caminho do seu pedido.</p>
+            <div class="btn-row">
+              <button class="btn btn-primary" id="motorRun" type="button"><span data-icon="play"></span> Ligar o motor</button>
+            </div>
+            <div class="live" id="live">
+              <div class="live-head"><b id="liveTotal">0</b> <span>pessoas já receberam a mensagem</span></div>
+              <ul class="live-list" id="liveList" aria-label="Últimos atendimentos"></ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>

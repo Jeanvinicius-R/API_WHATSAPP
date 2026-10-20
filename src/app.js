@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const { createSender } = require('./services/sender');
+const { createAtendimento } = require('./services/atendimento');
 const { createPublicRouter } = require('./routes/public');
 const { createAdminRouter } = require('./routes/admin');
 
@@ -14,6 +15,8 @@ const { createAdminRouter } = require('./routes/admin');
  */
 function createApp({ config, whatsapp, logger }) {
   const sender = createSender({ config, whatsapp, logger });
+  const atendimento = createAtendimento({ config, whatsapp, sender, logger });
+  atendimento.start();
   const app = express();
   app.disable('x-powered-by');
 
@@ -47,15 +50,7 @@ function createApp({ config, whatsapp, logger }) {
     message: { erro: { codigo: 'MUITAS_REQUISICOES', mensagem: 'Muitas requisições. Aguarde alguns segundos.' } },
   }));
 
-  const sendLimiter = rateLimit({
-    windowMs: 60_000,
-    limit: config.sendRateLimitPerMinute,
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    message: { erro: { codigo: 'MUITAS_REQUISICOES', mensagem: 'Muitos envios em pouco tempo. Aguarde um minuto.' } },
-  });
-
-  app.use('/api', createPublicRouter({ sender, sendLimiter }));
+  app.use('/api', createPublicRouter({ sender, whatsapp, atendimento }));
   app.use('/admin', createAdminRouter({ config, whatsapp, sender, logger }));
 
   app.use(express.static(path.join(__dirname, '..', 'public'), { index: 'index.html', maxAge: 0 }));

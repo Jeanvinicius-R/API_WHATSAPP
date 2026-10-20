@@ -89,6 +89,11 @@ class WhatsAppService extends EventEmitter {
       this.logger.error(this.lastError, 'WHATSAPP_DESCONECTADO');
       this._scheduleReconnect();
     });
+    client.on('message', (msg) => {
+      try {
+        this.emit('incoming', { chatId: msg.from, body: msg.body, fromMe: !!msg.fromMe, tipo: msg.type });
+      } catch { /* mensagem recebida nunca deve derrubar o processo */ }
+    });
     client.on('message_ack', (msg, ack) => {
       try {
         this.emit('ack', msg?.id?._serialized, ack);
@@ -141,6 +146,11 @@ class WhatsAppService extends EventEmitter {
     clearTimeout(this.reconnectTimer);
     this.reconnectTimer = null;
     await this._destroyClient();
+  }
+
+  /** Número do WhatsApp conectado (só dígitos, com DDI) — usado no link/QR Code público. */
+  ownNumber() {
+    return this.isReady() ? this.client?.info?.wid?.user || null : null;
   }
 
   /** QR Code como imagem (data URL). Só deve ser chamado por rotas administrativas. */

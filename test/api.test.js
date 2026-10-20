@@ -3,7 +3,7 @@
 // Testes de integração HTTP (precisam das dependências instaladas: npm install).
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { testConfig, silentLogger, fakeWhatsApp, waitForJob } = require('./helpers');
+const { testConfig, silentLogger, fakeWhatsApp } = require('./helpers');
 
 let createApp;
 try {
@@ -32,8 +32,6 @@ if (createApp) {
     };
     return { cfg, logger, wa, sender, server, base, call, close: () => new Promise((r) => server.close(r)) };
   }
-
-  const envio = (extra = {}) => ({ telefone: '(16) 99123-4567', apelido: 'Ana', consentimento: true, ...extra });
 
   test('status, salários e arquivos estáticos', async () => {
     const t = await boot();
@@ -66,67 +64,51 @@ if (createApp) {
     } finally { await t.close(); }
   });
 
-  test('fluxo completo pela API: envio → acompanhamento dos estados', async () => {
-    const t = await boot();
-    try {
-      const bad = await t.call('/api/mensagem/enviar', { method: 'POST', body: envio({ consentimento: false }) });
-      assert.equal(bad.status, 400);
-      assert.equal(bad.json.erro.codigo, 'CONSENTIMENTO_OBRIGATORIO');
-
-      const ok = await t.call('/api/mensagem/enviar', { method: 'POST', body: envio() });
-      assert.equal(ok.status, 202);
-      const job = await waitForJob(t.sender, ok.json.jobId);
-      assert.equal(job.estado, 'concluido');
-      const viaHttp = await t.call(`/api/mensagem/envio/${ok.json.jobId}`);
-      assert.equal(viaHttp.status, 200);
-      assert.ok(!viaHttp.text.includes('991234567'));
-      assert.equal(t.wa.sent.length, 1);
-
-      const again = await t.call('/api/mensagem/enviar', { method: 'POST', body: envio() });
-      assert.equal(again.status, 429);
-      assert.equal((await t.call('/api/mensagem/envio/inexistente')).status, 404);
-    } finally { await t.close(); }
-  });
-
-  test('rate limit do endpoint de envio e JSON inválido', async () => {
-    const t = await boot({ config: { sendRateLimitPerMinute: 2 } });
-    try {
-      const codes = [];
-      for (let i = 0; i < 4; i++) {
-        const r = await t.call('/api/mensagem/enviar', { method: 'POST', body: { telefone: '1', consentimento: true } });
-        codes.push(r.status);
-      }
-      assert.deepEqual(codes, [422, 422, 429, 429]);
-
-      const res = await fetch(`${t.base}/api/mensagem/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{quebrado' });
-      assert.ok([400, 429].includes(res.status));
-    } finally { await t.close(); }
-  });
-
-  test('JSON inválido devolve erro amigável', async () => {
-    const t = await boot();
-    try {
-      const res = await fetch(`${t.base}/api/mensagem/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{quebrado' });
-      assert.equal(res.status, 400);
-      assert.equal((await res.json()).erro.codigo, 'JSON_INVALIDO');
-    } finally { await t.close(); }
-  });
-
-  test('envio bloqueado com WhatsApp desconectado (HTTP 503) e funciona no modo demo', async () => {
-    const wa = fakeWhatsApp({ ready: false });
+  test('QR Code público: só com WhatsApp conectado, nunca em demonstração, e sem expor autenticação', async () => {
+    const wa = fakeWhatsApp();
+    wa.ownNumber = () => '5516999990000';
     const t = await boot({ wa });
     try {
-      assert.equal((await t.call('/api/status')).json.envioDisponivel, false);
-      const r = await t.call('/api/mensagem/enviar', { method: 'POST', body: envio() });
-      assert.equal(r.status, 503);
-      assert.equal(r.json.erro.codigo, 'WHATSAPP_INDISPONIVEL');
-      assert.equal(wa.sent.length, 0);
+      const qr = await t.call('/api/mensagem/qr');
+      assert.equal(qr.json.disponivel, true);
+      assert.match(qr.json.qr, /^data:image\/png;base64,/);
+      assert.equal(qr.json.numero, '+5516999990000');
+      assert.match(qr.json.texto, /back-end/i);
 
       t.sender.setDemo(true);
-      assert.equal((await t.call('/api/status')).json.modo, 'simulado');
-      const sim = await t.call('/api/demo/simular', { method: 'POST', body: {} });
-      assert.equal(sim.status, 202);
-      assert.equal((await waitForJob(t.sender, sim.json.jobId)).simulado, true);
+      assert.deepEqual((await t.call('/api/mensagem/qr')).json, { disponivel: false, motivo: 'demo' });
+      t.sender.setDemo(false);
+
+      wa.ownNumber = () => null;
+      assert.equal((await t.call('/api/mensagem/qr')).json.motivo, 'whatsapp');
+    } finally { await t.close(); }
+  });
+
+  test('visitante que envia a mensagem do QR recebe a analogia do motor, uma vez, e aparece ao vivo', async () => {
+    const wa = fakeWhatsApp();
+    const t = await boot({ wa });
+    try {
+      assert.equal((await t.call('/api/mensagem/ao-vivo')).json.total, 0);
+      wa.emit('incoming', { chatId: '5516991234567@c.us', body: 'Oi! Quero entender o que é back-end 🚗', fromMe: false, tipo: 'chat' });
+      for (let i = 0; i < 60 && (await t.call('/api/mensagem/ao-vivo')).json.recentes[0]?.estado !== 'respondido'; i++) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      const live = await t.call('/api/mensagem/ao-vivo');
+      assert.equal(live.json.total, 1);
+      assert.equal(live.json.recentes[0].estado, 'respondido');
+      assert.ok(!live.text.includes('991234567'), 'o número do visitante nunca aparece na tela');
+      assert.equal(wa.sent.length, 3);
+      assert.ok(wa.sent.every((m) => m.chatId === '5516991234567@c.us'));
+      assert.match(wa.sent[1].text, /motor do carro/i);
+    } finally { await t.close(); }
+  });
+
+  test('o antigo envio por número digitado não existe mais', async () => {
+    const t = await boot();
+    try {
+      for (const [p, m] of [['/api/mensagem/enviar', 'POST'], ['/api/demo/simular', 'POST'], ['/api/mensagem/envio/x', 'GET']]) {
+        assert.equal((await t.call(p, { method: m, body: m === 'POST' ? {} : undefined })).status, 404, p);
+      }
     } finally { await t.close(); }
   });
 
